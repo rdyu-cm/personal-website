@@ -7,6 +7,8 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://rdyu-cm.github.io/personal-website
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
