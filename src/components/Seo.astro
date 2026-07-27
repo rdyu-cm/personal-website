@@ -1,0 +1,45 @@
+---
+import { profile } from "../data/profile";
+
+export interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: string;
+  jsonLd?: object | object[];
+}
+
+const {
+  title,
+  description,
+  image,
+  type = "website",
+  jsonLd,
+} = Astro.props;
+const documentTitle = title.includes(profile.name)
+  ? title
+  : `${title} | ${profile.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+const socialImage = image ? new URL(image, canonical) : undefined;
+const serializedJsonLd = jsonLd
+  ? JSON.stringify(jsonLd).replace(/</g, "\u003c")
+  : undefined;
+---
+
+<title>{documentTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:title" content={documentTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={profile.name} />
+{socialImage && <meta property="og:image" content={socialImage} />}
+
+<meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
+<meta name="twitter:title" content={documentTitle} />
+<meta name="twitter:description" content={description} />
+{socialImage && <meta name="twitter:image" content={socialImage} />}
+
+{serializedJsonLd && <script is:inline type="application/ld+json" set:html={serializedJsonLd} />}

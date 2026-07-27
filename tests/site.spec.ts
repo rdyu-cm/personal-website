@@ -1,20 +1,51 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage navigation links activate matching section targets", async ({
+test("shared shell exposes page landmarks", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toBeVisible();
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
+    "href",
+    "/favicon.svg",
+  );
+});
+
+test("skip link is first in the focus order and moves focus to main", async ({
   page,
 }) => {
   await page.goto("/");
-  for (const [name, target] of [
-    ["Research", "research"],
-    ["Projects", "projects"],
-    ["Papers", "papers"],
-    ["CV", "cv"],
+
+  await page.keyboard.press("Tab");
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+  await expect(skipLink).toBeFocused();
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
+});
+
+test("primary navigation identifies home as the current page", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const navigation = page.getByRole("navigation", {
+    name: "Primary navigation",
+  });
+  for (const [name, href] of [
+    ["Home", "/"],
+    ["Research", "/research"],
+    ["Projects", "/projects"],
+    ["Papers", "/papers"],
+    ["About", "/about"],
+    ["CV", "/cv"],
   ]) {
-    const link = page.getByRole("link", { name });
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", `#${target}`);
-    await expect(page.locator(`#${target}`)).toHaveCount(1);
-    await link.click();
-    await expect(page).toHaveURL(new RegExp(`#${target}$`));
+    await expect(
+      navigation.getByRole("link", { name, exact: true }),
+    ).toHaveAttribute("href", href);
   }
+  await expect(
+    navigation.getByRole("link", { name: "Home", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
 });

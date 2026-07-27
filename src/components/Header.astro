@@ -1,0 +1,47 @@
+---
+import { profile } from "../data/profile";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const toRoute = (path: string) => `${base}${path}` || "/";
+const normalizePath = (path: string) => path.replace(/\/+$/, "") || "/";
+const currentPath = normalizePath(Astro.url.pathname);
+
+const navigation = [
+  { label: "Home", href: toRoute("/") },
+  { label: "Research", href: toRoute("/research") },
+  { label: "Projects", href: toRoute("/projects") },
+  { label: "Papers", href: toRoute("/papers") },
+  { label: "About", href: toRoute("/about") },
+  { label: "CV", href: toRoute("/cv") },
+];
+
+const isCurrent = (href: string) =>
+  normalizePath(new URL(href, Astro.url).pathname) === currentPath;
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="site-identity" href={toRoute("/")} aria-label={`${profile.name}, home`}>
+      <span class="site-name">{profile.name}</span>
+      <span class="site-discipline">{profile.headline}</span>
+    </a>
+
+    <nav aria-label="Primary navigation">
+      <ul class="nav-list" role="list">
+        {
+          navigation.map((item) => (
+            <li>
+              <a
+                class="nav-link"
+                href={item.href}
+                aria-current={isCurrent(item.href) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

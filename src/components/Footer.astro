@@ -1,0 +1,27 @@
+---
+import { profile } from "../data/profile";
+
+const currentYear = new Date().getUTCFullYear();
+const linkText = (label: string) => {
+  if (label === "Email") return `Email ${profile.name}`;
+  if (label === "GitHub") return `${profile.name} on GitHub`;
+  return `${profile.name} on ${label}`;
+};
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-note">
+      <span>&copy; {currentYear} {profile.name}.</span>
+      <span>Research in molecular simulation and AI for science.</span>
+    </p>
+
+    <ul class="footer-links" role="list" aria-label="Contact and profiles">
+      {
+        profile.links.map((link) => (
+          <li><a href={link.href}>{linkText(link.label)}</a></li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>
