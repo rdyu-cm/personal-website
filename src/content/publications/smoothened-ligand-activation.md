@@ -6,6 +6,7 @@ authors:
   - "Soo-Kyung Kim"
   - "William Goddard III"
 date: 2025-01-01
+datePrecision: year
 type: "Manuscript"
 status: "Submitted"
 themes:

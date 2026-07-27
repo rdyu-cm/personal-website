@@ -2,6 +2,7 @@
 title: "Smoothened/Gi activation mechanism"
 summary: "Molecular dynamics and metadynamics study of Smoothened/Gi conformational states and ligand activation."
 date: 2023-01-01
+datePrecision: year
 status: "Ongoing"
 themes:
   - "Molecular simulation"

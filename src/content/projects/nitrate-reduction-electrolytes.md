@@ -2,6 +2,7 @@
 title: "Machine-learned potentials for nitrate-reduction electrolytes"
 summary: "Machine-learned potential development for water, nitrate, and alkali-cation bulk electrolytes and TiH2/electrolyte interfaces."
 date: 2024-01-01
+datePrecision: year
 status: "Ongoing"
 themes:
   - "Machine-learned potentials"

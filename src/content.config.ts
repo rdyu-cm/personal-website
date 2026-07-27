@@ -18,6 +18,7 @@ const projects = defineCollection({
       title: z.string(),
       summary: z.string(),
       date: z.coerce.date(),
+      datePrecision: z.enum(["year", "month", "day"]),
       status: z.string(),
       themes: z.array(z.string()).min(1),
       role: z.string(),
@@ -25,13 +26,16 @@ const projects = defineCollection({
       draft: z.boolean(),
       collaborators: z.array(z.string()).optional(),
       heroImage: z.string().optional(),
-      heroAlt: z.string().optional(),
+      heroAlt: z.string().trim().min(1).optional(),
       links: externalLinksSchema.optional(),
     })
-    .refine((project) => !project.heroImage || Boolean(project.heroAlt), {
-      message: "heroAlt is required when heroImage is provided",
-      path: ["heroAlt"],
-    }),
+    .refine(
+      (project) => !project.heroImage || Boolean(project.heroAlt?.trim()),
+      {
+        message: "heroAlt is required when heroImage is provided",
+        path: ["heroAlt"],
+      },
+    ),
 });
 
 const publications = defineCollection({
@@ -40,6 +44,7 @@ const publications = defineCollection({
     title: z.string(),
     authors: z.array(z.string()).min(1),
     date: z.coerce.date(),
+    datePrecision: z.enum(["year", "month", "day"]),
     type: z.string(),
     status: z.string(),
     themes: z.array(z.string()).min(1),
