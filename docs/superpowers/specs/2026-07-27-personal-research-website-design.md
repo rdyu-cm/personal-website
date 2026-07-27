@@ -364,8 +364,9 @@ Before launch:
 
 ## Content Required From the Site Owner
 
-Implementation can begin with placeholders clearly marked as unpublished, but
-production launch requires:
+Implementation can begin before every production detail is available by using
+explicitly labeled sample content that is excluded from the production build.
+Production launch requires:
 
 - Exact public name and preferred headline
 - Current role and affiliation
@@ -381,17 +382,18 @@ production launch requires:
 
 ## Delivery Sequence
 
-1. Initialize the Git repository and Astro project in an isolated feature
-   worktree once a repository and default branch exist.
-2. Define design tokens and typed content schemas.
-3. Build the responsive application shell.
-4. Implement the homepage and one complete project case study using verified
+1. Initialize the currently empty directory as a Git repository and create a
+   baseline commit containing the approved design and repository metadata.
+2. Create an isolated feature worktree before adding the Astro application.
+3. Define design tokens and typed content schemas.
+4. Build the responsive application shell.
+5. Implement the homepage and one complete project case study using verified
    content.
-5. Implement Research, Projects, Papers, About, CV, and 404 pages.
-6. Add metadata, structured data, sitemap, analytics, and final assets.
-7. Run the verification strategy and correct findings.
-8. Deploy a Cloudflare Pages preview for user review.
-9. Connect and verify the custom domain after explicit approval.
+6. Implement Research, Projects, Papers, About, CV, and 404 pages.
+7. Add metadata, structured data, sitemap, analytics, and final assets.
+8. Run the verification strategy and correct findings.
+9. Deploy a Cloudflare Pages preview for user review.
+10. Connect and verify the custom domain after explicit approval.
 
 ## Success Criteria
 
