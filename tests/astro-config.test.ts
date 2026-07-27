@@ -1,27 +1,25 @@
 import { expect, test, vi } from "vitest";
 
-const canonicalSite = "https://rdyu-cm.github.io/personal-website";
+const githubPagesSite = "https://rdyu-cm.github.io/personal-website";
+const rootDomainSite = "https://research.example.com";
 
-const loadConfig = async (siteUrl?: string) => {
+const loadConfig = async (siteUrl: string) => {
   vi.resetModules();
-  if (siteUrl) {
-    process.env.SITE_URL = siteUrl;
-  } else {
-    delete process.env.SITE_URL;
-  }
+  process.env.SITE_URL = siteUrl;
   return (await import("../astro.config.mjs")).default;
 };
 
-test("keeps local development at the server root", async () => {
-  const developmentConfig = await loadConfig();
+test("derives the GitHub Pages repository base from SITE_URL", async () => {
+  const config = await loadConfig(githubPagesSite);
 
-  expect(developmentConfig.site).toBe(canonicalSite);
-  expect(developmentConfig.base).toBeUndefined();
+  expect(config.site).toBe(githubPagesSite);
+  expect(config.base).toBe("/personal-website");
+  expect(config.trailingSlash).toBe("never");
 });
 
-test("uses the public canonical URL and repository base for production builds", async () => {
-  const productionConfig = await loadConfig(canonicalSite);
+test("uses no base for a root-domain SITE_URL", async () => {
+  const config = await loadConfig(rootDomainSite);
 
-  expect(productionConfig.site).toBe(canonicalSite);
-  expect(productionConfig.base).toBe("/personal-website");
+  expect(config.site).toBe(rootDomainSite);
+  expect(config.base).toBeUndefined();
 });
