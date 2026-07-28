@@ -12,7 +12,10 @@ const featuredProjects = takeFeatured(await getCollection("projects"), 3);
 const featuredPublications = takeFeatured(await getCollection("publications"), 3);
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const toRoute = (path: string) => `${base}${path}` || "/";
-const personJsonLd = buildPersonJsonLd(profile);
+const personJsonLd = buildPersonJsonLd(
+  profile,
+  Astro.site?.toString() ?? profile.domain,
+);
 
 const researchThemes = [
   {

@@ -47,6 +47,12 @@ describe("buildPersonJsonLd", () => {
     });
   });
 
+  test("uses the configured canonical URL when one is supplied", () => {
+    expect(
+      buildPersonJsonLd(profile, "https://research.example.com"),
+    ).toMatchObject({ url: "https://research.example.com" });
+  });
+
   test("omits optional fields instead of serializing undefined values", () => {
     const jsonLd = buildPersonJsonLd({
       ...profile,

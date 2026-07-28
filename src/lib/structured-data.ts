@@ -18,7 +18,10 @@ export const publicationFragmentId = (entryId: string) =>
 const httpUrl = /^https?:\/\//i;
 const scholarlyTypes = new Set(["journal", "conference", "preprint"]);
 
-export const buildPersonJsonLd = (profile: Profile) => {
+export const buildPersonJsonLd = (
+  profile: Profile,
+  canonicalUrl = profile.domain,
+) => {
   const sameAs = profile.links
     .map(({ href }) => href.trim())
     .filter((href) => httpUrl.test(href));
@@ -27,7 +30,7 @@ export const buildPersonJsonLd = (profile: Profile) => {
     "@context": "https://schema.org",
     "@type": "Person",
     name: profile.name,
-    url: profile.domain,
+    url: canonicalUrl,
     ...(profile.affiliation
       ? {
           affiliation: {
