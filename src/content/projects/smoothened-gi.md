@@ -11,6 +11,7 @@ themes:
 role: "Researcher"
 featured: true
 draft: false
+resultSummary: "This work identified a precoupled inactive Smoothened–closed Gi state and contributed to a submitted study of ligand activation."
 ---
 
 In the Goddard Lab, I use GROMACS and PLUMED to run molecular dynamics and metadynamics simulations of Smoothened/Gi. This work identified a precoupled inactive Smoothened–closed Gi state, investigated its free-energy barrier, and contributed to a submitted study of ligand activation.

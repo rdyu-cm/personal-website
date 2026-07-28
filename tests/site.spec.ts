@@ -141,20 +141,24 @@ test("projects index links to public case studies with research-document section
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
 });
 
-test("each public project route renders its canonical body sentence", async ({
+test("each public project route renders required headings and year-only dates", async ({
   page,
 }) => {
-  for (const [path, sentence] of [
-    [
-      "/projects/nitrate-reduction-electrolytes",
-      "I am also developing a potential for the TiH2/electrolyte interface",
-    ],
-    [
-      "/projects/smoothened-gi",
-      "This work identified a precoupled inactive Smoothened–closed Gi state",
-    ],
+  for (const [path, year] of [
+    ["/projects/nitrate-reduction-electrolytes", "2024"],
+    ["/projects/smoothened-gi", "2023"],
   ]) {
     await page.goto(path);
-    await expect(page.getByText(sentence, { exact: false })).toBeVisible();
+    for (const heading of [
+      "Scientific question",
+      "Approach",
+      "Validation and results",
+      "Reproducibility",
+      "Project record",
+    ]) {
+      await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+    }
+    await expect(page.locator(`time[datetime='${year}']`)).toBeVisible();
+    await expect(page.locator("time[datetime='2024-01-01']")).toHaveCount(0);
   }
 });

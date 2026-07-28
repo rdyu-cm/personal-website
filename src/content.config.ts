@@ -27,6 +27,7 @@ const projects = defineCollection({
       collaborators: z.array(z.string()).optional(),
       heroImage: z.string().optional(),
       heroAlt: z.string().trim().min(1).optional(),
+      resultSummary: z.string().trim().min(1).optional(),
       links: externalLinksSchema.optional(),
     })
     .refine(

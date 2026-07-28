@@ -1,4 +1,6 @@
 ---
+import { resolveFigureSource, validateFigure } from "../lib/figure";
+
 export interface Props {
   src: string;
   alt: string;
@@ -8,14 +10,12 @@ export interface Props {
 }
 
 const { src, alt, caption, width, height } = Astro.props;
-
-if (!alt.trim()) {
-  throw new Error("Figure alt text must be nonempty.");
-}
+validateFigure({ src, alt, caption, width, height });
+const resolvedSrc = resolveFigureSource(src, import.meta.env.BASE_URL);
 ---
 
 <figure class="figure">
-  <img src={src} alt={alt} width={width} height={height} loading="lazy" />
+  <img src={resolvedSrc} alt={alt} width={width} height={height} loading="lazy" />
   <figcaption>{caption}</figcaption>
 </figure>
 

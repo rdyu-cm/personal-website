@@ -42,7 +42,7 @@ const projects = sortByDateDescending(
               <ProjectCard
                 project={project}
                 href={toRoute(`/projects/${project.id}`)}
-                linkLabel="Read case study"
+                linkLabel={`Read case study: ${project.data.title}`}
               />
             ))}
           </div>
