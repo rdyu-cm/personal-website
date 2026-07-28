@@ -1,0 +1,39 @@
+---
+export interface Props {
+  src: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+}
+
+const { src, alt, caption, width, height } = Astro.props;
+
+if (!alt.trim()) {
+  throw new Error("Figure alt text must be nonempty.");
+}
+---
+
+<figure class="figure">
+  <img src={src} alt={alt} width={width} height={height} loading="lazy" />
+  <figcaption>{caption}</figcaption>
+</figure>
+
+<style>
+  .figure {
+    margin: var(--space-m) 0;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+  }
+
+  figcaption {
+    margin-block-start: var(--space-xs);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+  }
+</style>

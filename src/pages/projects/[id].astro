@@ -1,0 +1,199 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects", ({ data }) => !data.draft);
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const formatDate = (date: Date, precision: "year" | "month" | "day") => {
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: "UTC",
+    year: "numeric",
+  };
+  if (precision === "month" || precision === "day") options.month = "long";
+  if (precision === "day") options.day = "numeric";
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+};
+const linkLabels: Record<string, string> = {
+  doi: "DOI",
+  preprint: "Preprint",
+  code: "Code",
+  slides: "Slides",
+  bibtex: "BibTeX",
+  project: "Project",
+};
+const links = Object.entries(data.links ?? {}).flatMap(([key, href]) =>
+  href ? [{ href, label: linkLabels[key] ?? key }] : [],
+);
+---
+
+<BaseLayout title={data.title} description={data.summary} type="article">
+  <article class="case-study">
+    <header class="case-study__hero">
+      <div class="container case-study__hero-grid">
+        <div>
+          <p class="eyebrow">Project case study</p>
+          <h1>{data.title}</h1>
+          <p class="lede">{data.summary}</p>
+        </div>
+        <dl class="project-facts">
+          <div><dt>Status</dt><dd>{data.status}</dd></div>
+          <div><dt>Role</dt><dd>{data.role}</dd></div>
+          <div>
+            <dt>Record date</dt><dd>
+              <time datetime={data.date.toISOString().slice(0, 10)}
+                >{formatDate(data.date, data.datePrecision)}</time
+              >
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </header>
+
+    <div class="container case-study__grid">
+      <div class="case-study__marker" aria-hidden="true"></div>
+      <div class="case-study__content">
+        <section aria-labelledby="scientific-question-title">
+          <p class="section-label">01</p>
+          <h2 id="scientific-question-title">Scientific question</h2>
+          <p>{data.summary}</p>
+        </section>
+        <section aria-labelledby="approach-title">
+          <p class="section-label">02</p>
+          <h2 id="approach-title">Approach</h2>
+          <p>This work is recorded under the role of {data.role}.</p>
+          <ul class="method-list" aria-label="Methods and themes">
+            {data.themes.map((theme) => <li>{theme}</li>)}
+          </ul>
+        </section>
+        <section aria-labelledby="validation-results-title">
+          <p class="section-label">03</p>
+          <h2 id="validation-results-title">Validation and results</h2>
+          <div class="prose"><Content /></div>
+        </section>
+        <section aria-labelledby="reproducibility-title">
+          <p class="section-label">04</p>
+          <h2 id="reproducibility-title">Reproducibility</h2>
+          {
+            links.length > 0 ? (
+              <ul class="resource-list" aria-label="Project resources">
+                {links.map((link) => (
+                  <li>
+                    <a href={link.href}>{link.label}</a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>
+                The current public record does not include linked code, data, or
+                supplementary materials.
+              </p>
+            )
+          }
+          <p class="reproducibility-note">
+            This case study reflects the recorded status: {
+              data.status.toLowerCase()
+            }.
+          </p>
+        </section>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .case-study__hero {
+    padding-block: var(--space-xl);
+    border-block-end: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .case-study__hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.42fr);
+    gap: var(--space-l) var(--space-xl);
+    align-items: end;
+  }
+  .eyebrow,
+  .section-label {
+    margin: 0 0 var(--space-s);
+    color: var(--primary-strong);
+    font-size: var(--step--1);
+    font-weight: 720;
+    letter-spacing: 0.08em;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+  }
+  .case-study__hero .lede {
+    margin-block-start: var(--space-m);
+  }
+  .project-facts {
+    margin: 0;
+    border-block-start: 2px solid var(--accent);
+  }
+  .project-facts div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: var(--space-s);
+    padding-block: var(--space-xs);
+    border-block-end: 1px solid var(--border);
+  }
+  dt {
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+  }
+  dd {
+    margin: 0;
+    font-weight: 680;
+  }
+  .case-study__grid {
+    display: grid;
+    grid-template-columns: 0.3rem minmax(0, var(--prose-width));
+    gap: var(--space-l);
+    padding-block: var(--space-xl);
+  }
+  .case-study__marker {
+    background: linear-gradient(var(--primary), var(--accent));
+  }
+  .case-study__content section + section {
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-l);
+    border-block-start: 1px solid var(--border);
+  }
+  .case-study__content h2 {
+    margin-block-end: var(--space-m);
+  }
+  .method-list,
+  .resource-list {
+    margin: var(--space-m) 0 0;
+    padding-inline-start: 1.2rem;
+  }
+  .method-list li + li,
+  .resource-list li + li {
+    margin-block-start: var(--space-xs);
+  }
+  .reproducibility-note {
+    margin-block-start: var(--space-m);
+    color: var(--ink-muted);
+  }
+  @media (max-width: 42rem) {
+    .case-study__hero-grid {
+      grid-template-columns: 1fr;
+    }
+    .case-study__grid {
+      gap: var(--space-m);
+    }
+  }
+</style>

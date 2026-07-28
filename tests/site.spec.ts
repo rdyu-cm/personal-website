@@ -118,3 +118,43 @@ test("research page explains the ordered data-to-insight workflow", async ({
   await expect(flow).toHaveAttribute("role", "list");
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
 });
+
+test("projects index links to public case studies with research-document sections", async ({
+  page,
+}) => {
+  await page.goto("/projects");
+
+  const projectLinks = page.locator('main a[href^="/projects/"]');
+  await expect(projectLinks.first()).toBeVisible();
+  await projectLinks.first().click();
+
+  await expect(
+    page.getByRole("heading", { name: "Scientific question" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Approach" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Validation and results" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Reproducibility" }),
+  ).toBeVisible();
+  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+});
+
+test("each public project route renders its canonical body sentence", async ({
+  page,
+}) => {
+  for (const [path, sentence] of [
+    [
+      "/projects/nitrate-reduction-electrolytes",
+      "I am also developing a potential for the TiH2/electrolyte interface",
+    ],
+    [
+      "/projects/smoothened-gi",
+      "This work identified a precoupled inactive Smoothened–closed Gi state",
+    ],
+  ]) {
+    await page.goto(path);
+    await expect(page.getByText(sentence, { exact: false })).toBeVisible();
+  }
+});
