@@ -1,0 +1,51 @@
+---
+import { getCollection } from "astro:content";
+
+import PublicationList from "../components/PublicationList.astro";
+import { filterPublicEntries, sortByDateDescending } from "../lib/content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const publications = sortByDateDescending(
+  filterPublicEntries(await getCollection("publications")),
+);
+const publicationsByYear = Map.groupBy(
+  publications,
+  (publication) => publication.data.date.getUTCFullYear(),
+);
+const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
+---
+
+<BaseLayout
+  title="Papers"
+  description="Public manuscripts and research outputs by Ryan Yu."
+>
+  <section class="page-header">
+    <div class="container">
+      <p class="eyebrow">Research outputs</p>
+      <h1>Papers</h1>
+      <p class="lede">Public manuscripts and related research records, organized by year.</p>
+    </div>
+  </section>
+
+  <section class="page-content" aria-label="Publications by year">
+    <div class="container">
+      {
+        years.map((year) => (
+          <section class="year-group" aria-labelledby={`year-${year}`}>
+            <h2 id={`year-${year}`}>{year}</h2>
+            <PublicationList publications={publicationsByYear.get(year) ?? []} />
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header, .page-content { padding-block: var(--space-xl); }
+  .page-header { border-block-end: 1px solid var(--border); background: var(--surface); }
+  .eyebrow { color: var(--primary-strong); font-size: var(--step--1); font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; }
+  .lede { margin-block-start: var(--space-m); color: var(--ink-muted); font-size: var(--step-1); }
+  .year-group + .year-group { margin-block-start: var(--space-xl); }
+  .year-group h2 { margin-block-end: var(--space-m); }
+</style>

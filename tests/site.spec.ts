@@ -162,3 +162,83 @@ test("each public project route renders required headings and year-only dates", 
     await expect(page.locator("time[datetime='2024-01-01']")).toHaveCount(0);
   }
 });
+
+test("papers page groups public outputs by year and retains their publication status", async ({
+  page,
+}) => {
+  await page.goto("/papers");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Papers" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "2025" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+  await expect(page.getByRole("combobox")).toHaveCount(0);
+});
+
+test("about page presents the approved research trajectory without vanity content", async ({
+  page,
+}) => {
+  await page.goto("/about");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "About Ryan Yu" }),
+  ).toBeVisible();
+  await expect(page.getByText("2023 to 2027", { exact: false })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Goddard Lab", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Fong Lab", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/skill cloud|publications count|citation count/i),
+  ).toHaveCount(0);
+});
+
+test("CV is a contactable HTML summary without a PDF or phone number", async ({
+  page,
+}) => {
+  await page.goto("/cv");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Curriculum vitae" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: "Email Ryan Yu" }),
+  ).toHaveAttribute("href", "mailto:rdyu@caltech.edu");
+  await expect(page.locator('a[href$=".pdf"]')).toHaveCount(0);
+  await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+  await expect(page.locator("body")).not.toContainText(
+    /\b\d{3}[-.)\s]\d{3}[-.]\d{4}\b/,
+  );
+});
+
+test("missing routes render a branded, base-safe not-found page", async ({
+  page,
+}) => {
+  await page.goto("/missing-page");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Page not found" }),
+  ).toBeVisible();
+  for (const [name, href] of [
+    ["Home", "/"],
+    ["Research", "/research"],
+    ["Projects", "/projects"],
+    ["Papers", "/papers"],
+  ]) {
+    await expect(
+      page.getByRole("main").getByRole("link", { name, exact: true }),
+    ).toHaveAttribute("href", href);
+  }
+});
