@@ -7,7 +7,7 @@ authors:
   - "William Goddard III"
 date: 2025-01-01
 datePrecision: year
-type: "Manuscript"
+type: "manuscript"
 status: "Submitted"
 themes:
   - "Molecular simulation"

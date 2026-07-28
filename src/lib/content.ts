@@ -26,7 +26,15 @@ type FilterablePublication = Entry & {
 
 export type PublicationFilterDimension = "type";
 
-export const normalizePublicationType = (value: string) => value.trim();
+export const normalizePublicationType = (value: string) =>
+  value.trim().toLowerCase();
+
+export const publicationTypeLabel = (value: string) => {
+  const normalized = normalizePublicationType(value);
+  return normalized
+    ? normalized.charAt(0).toUpperCase() + normalized.slice(1)
+    : normalized;
+};
 
 export const publicationFilterOptions = <T extends FilterablePublication>(
   xs: T[],
@@ -38,7 +46,9 @@ export const publicationFilterOptions = <T extends FilterablePublication>(
         .map((entry) => normalizePublicationType(entry.data.type))
         .filter(Boolean),
     ),
-  ].sort((a, b) => a.localeCompare(b));
+  ]
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({ label: publicationTypeLabel(value), value }));
 
 export const canFilterPublications = <T extends FilterablePublication>(
   xs: T[],

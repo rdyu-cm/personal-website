@@ -45,8 +45,8 @@ const entries = [
 ];
 
 describe("content selectors", () => {
-  test("normalizes publication types by trimming surrounding whitespace", () => {
-    expect(normalizePublicationType("  Preprint \n")).toBe("Preprint");
+  test("normalizes publication types to lowercase comparison keys", () => {
+    expect(normalizePublicationType("  Preprint \n")).toBe("preprint");
   });
 
   test("excludes draft entries", () => {
@@ -151,11 +151,11 @@ describe("content selectors", () => {
     ]);
     expect(canFilterPublications(publicPublications, "type")).toBe(true);
     expect(publicationFilterOptions(publications, "type")).toEqual([
-      "Article",
-      "Preprint",
+      { label: "Article", value: "article" },
+      { label: "Preprint", value: "preprint" },
     ]);
     expect(
-      filterPublications(publicPublications, "type", "Preprint").map(
+      filterPublications(publicPublications, "type", " PREPRINT ").map(
         ({ id }) => id,
       ),
     ).toEqual(["new-preprint", "other-1", "other-3"]);
@@ -176,6 +176,12 @@ describe("content schemas", () => {
     ]) {
       expect(readSource(record)).toContain("datePrecision: year");
     }
+  });
+
+  test("uses lowercase publication type enums", () => {
+    expect(readSource("src/content.config.ts")).toContain(
+      'type: z.enum(["journal", "conference", "preprint", "manuscript"])',
+    );
   });
 
   test("trims and requires hero alt text when a hero image is supplied", () => {

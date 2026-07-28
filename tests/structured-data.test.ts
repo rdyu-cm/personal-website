@@ -4,6 +4,7 @@ import { profile } from "../src/data/profile";
 import {
   buildPersonJsonLd,
   buildScholarlyArticleJsonLd,
+  publicationFragmentId,
 } from "../src/lib/structured-data";
 
 const publication = (
@@ -60,7 +61,7 @@ describe("buildPersonJsonLd", () => {
 });
 
 describe("buildScholarlyArticleJsonLd", () => {
-  test("maps authors to Person objects for eligible published records", () => {
+  test("represents a published journal record with its verified periodical", () => {
     expect(
       buildScholarlyArticleJsonLd(
         publication(),
@@ -83,7 +84,27 @@ describe("buildScholarlyArticleJsonLd", () => {
     });
   });
 
-  test("omits publication claims for a submitted eligible record", () => {
+  test("omits a venue container for a published conference record", () => {
+    const jsonLd = buildScholarlyArticleJsonLd(
+      publication({ type: "conference", venue: "Example Conference" }),
+      "https://example.com/papers#example-publication",
+    );
+
+    expect(jsonLd).toMatchObject({ datePublished: "2025-03-14" });
+    expect(jsonLd).not.toHaveProperty("isPartOf");
+  });
+
+  test("omits a venue container for a published preprint record", () => {
+    const jsonLd = buildScholarlyArticleJsonLd(
+      publication({ type: "preprint", venue: "Example Repository" }),
+      "https://example.com/papers#example-publication",
+    );
+
+    expect(jsonLd).toMatchObject({ datePublished: "2025-03-14" });
+    expect(jsonLd).not.toHaveProperty("isPartOf");
+  });
+
+  test("omits publication claims for a submitted preprint record", () => {
     const jsonLd = buildScholarlyArticleJsonLd(
       publication({
         type: " Preprint ",
@@ -108,5 +129,15 @@ describe("buildScholarlyArticleJsonLd", () => {
         "https://example.com/papers#example-publication",
       ),
     ).toBeUndefined();
+  });
+});
+
+describe("publicationFragmentId", () => {
+  test("derives a stable base-safe HTML fragment from an entry id", () => {
+    const id = publicationFragmentId("Future Paper / β v2");
+
+    expect(id).toMatch(/^publication-[a-z0-9]+$/);
+    expect(publicationFragmentId("Future Paper / β v2")).toBe(id);
+    expect(publicationFragmentId("Future Paper / β v3")).not.toBe(id);
   });
 });

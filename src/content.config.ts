@@ -46,7 +46,7 @@ const publications = defineCollection({
     authors: z.array(z.string()).min(1),
     date: z.coerce.date(),
     datePrecision: z.enum(["year", "month", "day"]),
-    type: z.string(),
+    type: z.enum(["journal", "conference", "preprint", "manuscript"]),
     status: z.string(),
     themes: z.array(z.string()).min(1),
     featured: z.boolean(),

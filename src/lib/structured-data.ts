@@ -12,6 +12,8 @@ type PublicationEntry = {
     venue?: string;
   };
 };
+export const publicationFragmentId = (entryId: string) =>
+  `publication-${[...new TextEncoder().encode(entryId)].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 
 const httpUrl = /^https?:\/\//i;
 const scholarlyTypes = new Set(["journal", "conference", "preprint"]);
@@ -65,7 +67,7 @@ export const buildScholarlyArticleJsonLd = (
           ).datetime,
         }
       : {}),
-    ...(isPublished && venue
+    ...(isPublished && publicationType === "journal" && venue
       ? {
           isPartOf: {
             "@type": "Periodical",

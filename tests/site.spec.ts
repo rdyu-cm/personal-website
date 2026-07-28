@@ -35,7 +35,9 @@ test.describe("accessibility regression checks", () => {
     }
   });
 
-  test("research images have meaningful alternative text", async ({ page }) => {
+  test("every rendered research image has nonblank alternative text", async ({
+    page,
+  }) => {
     await page.goto("/research");
     const researchImages = page.locator("main img");
     for (let image = 0; image < (await researchImages.count()); image += 1) {
@@ -266,7 +268,7 @@ test("papers page preserves publication authors, status, and year-only date prec
   await expect(publicationTypes).toHaveCount(1);
   await expect(publicationTypes.first()).toHaveAttribute(
     "data-publication-type",
-    "Manuscript",
+    "manuscript",
   );
 });
 
