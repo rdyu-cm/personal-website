@@ -1,19 +1,300 @@
 ---
+import { getCollection } from "astro:content";
+
+import ProjectCard from "../components/ProjectCard.astro";
+import PublicationList from "../components/PublicationList.astro";
 import { profile } from "../data/profile";
+import { takeFeatured } from "../lib/content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const featuredProjects = takeFeatured(await getCollection("projects"), 3);
+const featuredPublications = takeFeatured(await getCollection("publications"), 3);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const toRoute = (path: string) => `${base}${path}` || "/";
+
+const researchThemes = [
+  {
+    title: "AI/ML potentials",
+    description:
+      "Developing machine-learned potentials from first-principles calculations for nitrate-reduction electrolytes and TiH2/electrolyte interfaces.",
+  },
+  {
+    title: "Molecular simulation",
+    description:
+      "Using molecular dynamics and metadynamics to examine interfacial distributions, conformational states, and free-energy barriers.",
+  },
+  {
+    title: "Chemical questions",
+    description:
+      "Connecting computation to electrochemical interfaces and biomolecular activation mechanisms.",
+  },
+];
 ---
 
 <BaseLayout title={profile.name} description={profile.shortBio}>
-  <section class="intro-block">
-    <div class="container intro-grid">
-      <div class="intro-heading">
-        {profile.affiliation && <p class="context-line">{profile.affiliation}</p>}
+  <section class="home-hero">
+    <div class="container home-hero__grid">
+      <div class="home-hero__identity">
+        <p class="hero-role">Chemical Engineering (Computational) undergraduate at Caltech</p>
         <h1>{profile.name}</h1>
       </div>
-      <div class="intro-copy">
-        <p class="lede">{profile.headline}</p>
-        <p>{profile.shortBio}</p>
+      <div class="home-hero__thesis">
+        <p class="hero-thesis">
+          I use AI/ML potentials and molecular simulation to study electrochemical
+          interfaces and biomolecular mechanisms.
+        </p>
+        <p class="workflow-statement">
+          My scientific workflow moves from first-principles data through learned
+          potentials and simulation to physical insight.
+        </p>
+        <a class="button" href={toRoute("/research")}>Explore the research process</a>
       </div>
     </div>
   </section>
+
+  <section class="home-section research-interests" aria-labelledby="research-interests-title">
+    <div class="container">
+      <div class="section-heading">
+        <h2 id="research-interests-title">Research interests</h2>
+        <p>
+          Computational chemical engineering across learned representations,
+          molecular-scale dynamics, and physically grounded interpretation.
+        </p>
+      </div>
+      <dl class="theme-list">
+        {
+          researchThemes.map((theme) => (
+            <div>
+              <dt>{theme.title}</dt>
+              <dd>{theme.description}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  {
+    featuredProjects.length > 0 && (
+      <section class="home-section selected-work" aria-labelledby="selected-work-title">
+        <div class="container">
+          <div class="section-heading section-heading--split">
+            <h2 id="selected-work-title">Selected projects</h2>
+            <p>Current research spanning electrochemical and biomolecular systems.</p>
+          </div>
+          <div class="project-list">
+            {featuredProjects.map((project) => (
+              <ProjectCard
+                project={project}
+                href={toRoute(`/research#${project.id}`)}
+                linkLabel={`Explore ${project.data.title}`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    featuredPublications.length > 0 && (
+      <section class="home-section outputs" aria-labelledby="outputs-title">
+        <div class="container">
+          <div class="section-heading section-heading--split">
+            <h2 id="outputs-title">Research outputs</h2>
+            <p>Public manuscripts and related research records.</p>
+          </div>
+          <PublicationList publications={featuredPublications} />
+        </div>
+      </section>
+    )
+  }
+
+  {
+    profile.links.length > 0 && (
+      <section class="contact-band" aria-labelledby="contact-title">
+        <div class="container contact-band__inner">
+          <div>
+            <h2 id="contact-title">Contact</h2>
+            <p>For research correspondence or code, use the public channels below.</p>
+          </div>
+          <ul aria-label="Contact links">
+            {profile.links.map((link) => (
+              <li><a href={link.href}>{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
+
+<style>
+  .home-hero {
+    min-height: clamp(32rem, 74vh, 48rem);
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-xl);
+    border-block-end: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .home-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
+    align-items: end;
+    gap: var(--space-l) var(--space-xl);
+  }
+
+  .home-hero__identity {
+    padding-block-start: var(--space-l);
+    border-block-start: 0.3rem solid var(--accent);
+  }
+
+  .hero-role {
+    max-width: 34rem;
+    margin-block-end: var(--space-s);
+    color: var(--primary-strong);
+    font-weight: 720;
+  }
+
+  .home-hero__thesis { max-width: 39rem; }
+
+  .hero-thesis {
+    font-size: var(--step-2);
+    font-weight: 660;
+    line-height: 1.28;
+    letter-spacing: -0.02em;
+  }
+
+  .workflow-statement {
+    margin-block-start: var(--space-m);
+    padding-block: var(--space-s);
+    border-block: 1px solid var(--border);
+    color: var(--ink-muted);
+  }
+
+  .home-hero .button { margin-block-start: var(--space-m); }
+  .home-section { padding-block: var(--space-xl); }
+  .research-interests, .outputs { background: var(--canvas); }
+
+  .selected-work {
+    border-block: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .section-heading { margin-block-end: var(--space-l); }
+
+  .section-heading--split {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-xl);
+  }
+
+  .section-heading p {
+    margin-block-start: var(--space-s);
+    color: var(--ink-muted);
+  }
+
+  .section-heading--split p {
+    max-width: 32rem;
+    margin-block-start: 0;
+  }
+
+  .theme-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .theme-list > div {
+    min-width: 0;
+    padding: var(--space-m);
+  }
+
+  .theme-list > div + div { border-inline-start: 1px solid var(--border); }
+
+  .theme-list dt {
+    font-size: var(--step-1);
+    font-weight: 740;
+  }
+
+  .theme-list dd {
+    margin: var(--space-s) 0 0;
+    color: var(--ink-muted);
+  }
+
+  .project-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  .contact-band {
+    padding-block: var(--space-l);
+    color: var(--canvas);
+    background: var(--primary-strong);
+  }
+
+  .contact-band__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-xl);
+  }
+
+  .contact-band h2 {
+    color: var(--canvas);
+    font-size: var(--step-2);
+  }
+
+  .contact-band p {
+    margin-block-start: var(--space-xs);
+    color: var(--surface-strong);
+  }
+
+  .contact-band ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contact-band a {
+    color: var(--canvas);
+    font-weight: 720;
+    text-decoration-color: var(--cobalt-light);
+  }
+
+  @media (max-width: 48rem) {
+    .home-hero__grid {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .section-heading--split,
+    .contact-band__inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .theme-list { grid-template-columns: 1fr; }
+
+    .theme-list > div {
+      padding-inline: 0;
+      border-block-end: 1px solid var(--border);
+    }
+
+    .theme-list > div + div { border-inline-start: 0; }
+  }
+
+  @media (max-width: 24rem) {
+    .home-hero { min-height: 0; }
+    .hero-thesis { font-size: var(--step-1); }
+  }
+</style>

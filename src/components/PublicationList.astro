@@ -1,0 +1,119 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+export interface Props {
+  publications: CollectionEntry<"publications">[];
+}
+
+const { publications } = Astro.props;
+
+const formatDate = (date: Date, precision: "year" | "month" | "day") => {
+  const options: Intl.DateTimeFormatOptions = { timeZone: "UTC", year: "numeric" };
+  if (precision === "month" || precision === "day") options.month = "long";
+  if (precision === "day") options.day = "numeric";
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+};
+
+const linkLabels: Record<string, string> = {
+  doi: "DOI",
+  preprint: "Preprint",
+  code: "Code",
+  slides: "Slides",
+  bibtex: "BibTeX",
+  project: "Project",
+};
+
+const availableLinks = (publication: CollectionEntry<"publications">) =>
+  Object.entries(publication.data.links ?? {}).flatMap(([key, href]) =>
+    href ? [{ href, label: linkLabels[key] ?? key }] : [],
+  );
+---
+
+<ol class="publication-list">
+  {
+    publications.map((publication) => {
+      const links = availableLinks(publication);
+
+      return (
+        <li class="publication-item">
+          <p class="publication-authors">{publication.data.authors.join(", ")}</p>
+          <p class="publication-title"><cite>{publication.data.title}</cite></p>
+          <p class="publication-meta">
+            <span>{publication.data.status}</span>
+            <span aria-hidden="true">·</span>
+            <time datetime={publication.data.date.toISOString().slice(0, 10)}>
+              {formatDate(publication.data.date, publication.data.datePrecision)}
+            </time>
+            {publication.data.venue && <span aria-hidden="true">·</span>}
+            {publication.data.venue && <span>{publication.data.venue}</span>}
+          </p>
+          {publication.data.summary && (
+            <p class="publication-summary">{publication.data.summary}</p>
+          )}
+          {links.length > 0 && (
+            <ul class="publication-links" aria-label={`Links for ${publication.data.title}`}>
+              {links.map((link) => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          )}
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  .publication-list {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--border);
+    list-style: none;
+  }
+
+  .publication-item {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.35fr) minmax(0, 0.65fr);
+    gap: var(--space-xs) var(--space-l);
+    padding-block: var(--space-m);
+    border-block-end: 1px solid var(--border);
+  }
+
+  .publication-authors {
+    grid-row: span 4;
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+  }
+
+  .publication-title {
+    max-width: 54rem;
+    font-size: var(--step-1);
+    font-weight: 720;
+    line-height: 1.3;
+  }
+
+  cite { font-style: normal; }
+
+  .publication-meta,
+  .publication-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem var(--space-xs);
+    color: var(--primary-strong);
+    font-size: var(--step--1);
+    font-weight: 680;
+  }
+
+  .publication-summary { color: var(--ink-muted); }
+
+  .publication-links {
+    margin: var(--space-xs) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 42rem) {
+    .publication-item { grid-template-columns: 1fr; }
+    .publication-authors { grid-row: auto; }
+  }
+</style>

@@ -49,3 +49,62 @@ test("primary navigation identifies home as the current page", async ({
     navigation.getByRole("link", { name: "Home", exact: true }),
   ).toHaveAttribute("aria-current", "page");
 });
+
+test("homepage presents the public research overview with one primary heading", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(
+    page.getByRole("heading", { name: "Research interests" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Chemical Engineering (Computational) undergraduate at Caltech",
+      { exact: false },
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore the research process" }),
+  ).toHaveAttribute("href", "/research");
+  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+  await expect(
+    page.getByRole("article").filter({
+      hasText: "Machine-learned potentials for nitrate-reduction electrolytes",
+    }),
+  ).toContainText("2024");
+  await expect(
+    page.getByRole("article").filter({
+      hasText: "Machine-learned potentials for nitrate-reduction electrolytes",
+    }),
+  ).not.toContainText("January");
+  await expect(
+    page.getByText(
+      "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+});
+
+test("research page explains the ordered data-to-insight workflow", async ({
+  page,
+}) => {
+  await page.goto("/research");
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  const flow = page.getByRole("list", { name: "Research workflow" });
+  const stages = flow.getByRole("listitem");
+
+  await expect(stages).toHaveCount(4);
+  for (const [index, stage] of [
+    "First-principles data",
+    "Learned potentials",
+    "Molecular simulation",
+    "Physical insight",
+  ].entries()) {
+    await expect(stages.nth(index)).toContainText(stage);
+  }
+  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+});
