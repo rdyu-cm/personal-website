@@ -292,6 +292,18 @@ test("about page presents the approved research trajectory without vanity conten
   ).toHaveCount(0);
 });
 
+test("about Person JSON-LD uses Astro's configured canonical site", async ({
+  page,
+}) => {
+  await page.goto("/about");
+
+  const personJsonLd = page.locator('script[type="application/ld+json"]');
+  await expect(personJsonLd).toHaveCount(1);
+  expect(
+    JSON.parse(await personJsonLd.evaluate((script) => script.innerHTML)),
+  ).toMatchObject({ url: "http://127.0.0.1:4321/" });
+});
+
 test("CV is a contactable HTML summary without a PDF or phone number", async ({
   page,
 }) => {

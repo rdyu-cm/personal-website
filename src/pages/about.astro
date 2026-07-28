@@ -3,7 +3,10 @@ import { profile } from "../data/profile";
 import { buildPersonJsonLd } from "../lib/structured-data";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const personJsonLd = buildPersonJsonLd(profile);
+const personJsonLd = buildPersonJsonLd(
+  profile,
+  Astro.site?.toString() ?? profile.domain,
+);
 
 ---
 

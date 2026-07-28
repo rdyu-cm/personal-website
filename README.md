@@ -42,14 +42,19 @@ of `journal`, `conference`, `preprint`, or `manuscript`; optional links are
 validated URLs. A project that has `heroImage` must also provide meaningful
 `heroAlt` text.
 
-Only add images that are intended to be public. Put a public static image under
-`public/` and reference it with a base-safe path (for example,
-`/images/example.png`); provide accurate alt text and dimensions whenever it is
-rendered with `Figure`. Do not put private source images, unpublished figures,
-or personal documents in `public/`, `src/content/`, or any referenced asset
-path: everything copied to `dist/` is publicly deployable.
+Only add images that are intended to be public. Put public static images in
+`public/images/` and reference them with a base-safe path (for example,
+`/images/example.png`). For each rendered image, record meaningful alt text and
+its intrinsic dimensions in the relevant content entry before using `Figure`.
+Before committing, review the image, filename, alt text, frontmatter, and
+surrounding copy for private, unpublished, identifying, or otherwise sensitive
+information. Do not put private source images, unpublished figures, or personal
+documents in `public/`, `src/content/`, or any referenced asset path: everything
+copied to `dist/` is publicly deployable.
 
-The site deliberately serves an HTML CV, not a downloadable resume. Keep
+The site deliberately serves an HTML CV from `src/pages/cv.astro`, not a
+downloadable resume. Update that source directly, preview the rendered `/cv`
+route, and run the verification suite before publishing. Keep
 `Yu_Ryan_Resume.pdf` only at repository root: it is ignored by Git and must
 remain untracked. Never move, link, or copy it into `public/` or `dist/`.
 Do not add a phone number to the CV or other public content.

@@ -23,5 +23,5 @@ jobs:
       - run: npm run format:check
       - run: npm run check
       - run: npm run test:unit
-      - run: npm run test:e2e -- --project=chromium
+      - run: npm run test:e2e
       - run: npm run build
