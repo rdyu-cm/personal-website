@@ -86,6 +86,10 @@ test("homepage presents the public research overview with one primary heading", 
     ),
   ).toBeVisible();
   await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(page.locator(".publication-list")).toHaveAttribute(
+    "role",
+    "list",
+  );
 });
 
 test("research page explains the ordered data-to-insight workflow", async ({
@@ -106,5 +110,11 @@ test("research page explains the ordered data-to-insight workflow", async ({
   ].entries()) {
     await expect(stages.nth(index)).toContainText(stage);
   }
+  await expect(
+    page.getByText("molecule-similarity testing and model validation", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(flow).toHaveAttribute("role", "list");
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
 });

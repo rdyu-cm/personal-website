@@ -50,3 +50,12 @@
 - No horizontal overflow at 320px on either page.
 - Internal homepage and project-context links use `BASE_URL`; generated default/root-domain HTML was inspected in both configurations.
 - Publication author order is unchanged, titles use `cite`, absent links/venue are omitted, and public contact links are the profile's existing Email and GitHub records.
+
+## Fix wave 1
+
+- Head: recorded after commit in the task handoff.
+- Files: `src/components/PublicationList.astro`, `src/components/ResearchFlow.astro`, `src/pages/research.astro`, `tests/site.spec.ts`, `.superpowers/sdd/task-4-report.md`.
+- Validation: added the résumé-verified 2025 VOC/LSER molecule-similarity and model-validation example; ML-potential text now limits DFT claims to reference calculations and training data.
+- Accessibility/layout: all marker-suppressed lists in `ResearchFlow` and `PublicationList` now declare `role="list"`; stage numbers are exposed as stage labels; the workflow stays vertically connected below the 4-column desktop breakpoint.
+- Canonical content: project body prose on `/research` now renders from the projects collection rather than duplicated page copy.
+- Results: `npm run format:check`, `npm run check`, `npm run test:unit` (13/13), `npm run test:e2e -- tests/site.spec.ts` (10/10 across chromium and pixel-7), `npm run build`, `SITE_URL=https://research.example.com npm run build`, and `git diff --check` all passed.

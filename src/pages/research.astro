@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 
 import ResearchFlow from "../components/ResearchFlow.astro";
 import { profile } from "../data/profile";
@@ -11,6 +11,8 @@ const nitrateProject = projects.find(
   (project) => project.id === "nitrate-reduction-electrolytes",
 );
 const smoothenedProject = projects.find((project) => project.id === "smoothened-gi");
+const NitrateContent = nitrateProject && (await render(nitrateProject)).Content;
+const SmoothenedContent = smoothenedProject && (await render(smoothenedProject)).Content;
 ---
 
 <BaseLayout
@@ -43,6 +45,10 @@ const smoothenedProject = projects.find((project) => project.id === "smoothened-
         </p>
       </div>
       <ResearchFlow />
+      <p class="validation-note">
+        Validation closes the modeling loop in a separate 2025 VOC/LSER data-science
+        project, where I used molecule-similarity testing and model validation.
+      </p>
     </div>
   </section>
 
@@ -61,12 +67,7 @@ const smoothenedProject = projects.find((project) => project.id === "smoothened-
             </div>
             <div class="track-copy">
               <p>{nitrateProject.data.summary}</p>
-              <p>
-                In the Fong Lab, I use MACE, molecular dynamics, and density functional
-                theory to develop a machine-learned potential for water, nitrate, and
-                alkali-cation bulk electrolytes. I am also developing a potential for
-                the TiH2/electrolyte interface to study nitrate interfacial distributions.
-              </p>
+              {NitrateContent && <NitrateContent />}
               <ul aria-label="Nitrate-reduction research themes">
                 {nitrateProject.data.themes.map((theme) => <li>{theme}</li>)}
               </ul>
@@ -90,13 +91,7 @@ const smoothenedProject = projects.find((project) => project.id === "smoothened-
             </div>
             <div class="track-copy">
               <p>{smoothenedProject.data.summary}</p>
-              <p>
-                In the Goddard Lab, I use GROMACS and PLUMED for molecular dynamics
-                and metadynamics simulations of Smoothened/Gi. The work identified a
-                precoupled inactive Smoothened–closed Gi state, investigated its
-                free-energy barrier, and contributed to a submitted study of ligand
-                activation.
-              </p>
+              {SmoothenedContent && <SmoothenedContent />}
               <ul aria-label="Smoothened research themes">
                 {smoothenedProject.data.themes.map((theme) => <li>{theme}</li>)}
               </ul>
@@ -133,6 +128,7 @@ const smoothenedProject = projects.find((project) => project.id === "smoothened-
   .research-lede + p { color: var(--ink-muted); }
   .flow-section, .research-track { padding-block: var(--space-xl); }
   .flow-section { border-block-end: 1px solid var(--border); }
+  .validation-note { max-width: var(--prose-width); margin-block-start: var(--space-l); color: var(--ink-muted); }
 
   .section-heading {
     display: grid;

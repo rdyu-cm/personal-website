@@ -3,12 +3,12 @@ const stages = [
   {
     title: "First-principles data",
     description:
-      "Density functional theory provides reference data for potential development in water, nitrate, alkali-cation electrolytes, and the TiH2/electrolyte interface.",
+      "Density functional theory supplies reference calculations and training data for potential development in water, nitrate, alkali-cation electrolytes, and the TiH2/electrolyte interface.",
   },
   {
     title: "Learned potentials",
     description:
-      "MACE is used to develop machine-learned potentials for the bulk electrolytes and TiH2 interface under study.",
+      "MACE is used to develop machine-learned potentials for the bulk electrolytes and TiH2 interface under study from those reference calculations.",
   },
   {
     title: "Molecular simulation",
@@ -23,11 +23,11 @@ const stages = [
 ];
 ---
 
-<ol class="research-flow" aria-label="Research workflow">
+<ol class="research-flow" aria-label="Research workflow" role="list">
   {
     stages.map((stage, index) => (
       <li>
-        <span class="stage-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+        <span class="stage-index" aria-label={`Stage ${index + 1}`}>{String(index + 1).padStart(2, "0")}</span>
         <h3>{stage.title}</h3>
         <p>{stage.description}</p>
       </li>
@@ -83,11 +83,6 @@ const stages = [
   }
 
   @media (max-width: 58rem) {
-    .research-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .research-flow li:nth-child(2)::after { display: none; }
-  }
-
-  @media (max-width: 34rem) {
     .research-flow {
       grid-template-columns: 1fr;
       gap: 0;
