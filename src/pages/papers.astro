@@ -2,7 +2,12 @@
 import { getCollection } from "astro:content";
 
 import PublicationList from "../components/PublicationList.astro";
-import { filterPublicEntries, sortByDateDescending } from "../lib/content";
+import {
+  canFilterPublications,
+  filterPublicEntries,
+  publicationFilterOptions,
+  sortByDateDescending,
+} from "../lib/content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const publications = sortByDateDescending(
@@ -13,6 +18,9 @@ const publicationsByYear = Map.groupBy(
   (publication) => publication.data.date.getUTCFullYear(),
 );
 const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
+const filterDimension = "type";
+const filterOptions = publicationFilterOptions(publications, filterDimension);
+const showFilter = canFilterPublications(publications, filterDimension);
 ---
 
 <BaseLayout
@@ -27,6 +35,20 @@ const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
     </div>
   </section>
 
+  {showFilter && (
+    <section class="publication-filter" aria-label="Filter publications">
+      <div class="container">
+        <label for="publication-filter">
+          Filter by type
+          <select id="publication-filter" data-publication-filter>
+            <option value="all">All</option>
+            {filterOptions.map((option) => <option value={option}>{option}</option>)}
+          </select>
+        </label>
+      </div>
+    </section>
+  )}
+
   <section class="page-content" aria-label="Publications by year">
     <div class="container">
       {
@@ -39,6 +61,22 @@ const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
       }
     </div>
   </section>
+  <script>
+    const filter = document.querySelector<HTMLSelectElement>("[data-publication-filter]");
+
+    filter?.addEventListener("change", () => {
+      const selectedType = filter.value;
+      const publications = document.querySelectorAll<HTMLElement>("[data-publication-type]");
+
+      publications.forEach((publication) => {
+        publication.hidden =
+          selectedType !== "all" && publication.dataset.publicationType !== selectedType;
+      });
+      document.querySelectorAll<HTMLElement>(".year-group").forEach((group) => {
+        group.hidden = !group.querySelector("[data-publication-type]:not([hidden])");
+      });
+    });
+  </script>
 </BaseLayout>
 
 <style>
@@ -46,6 +84,9 @@ const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
   .page-header { border-block-end: 1px solid var(--border); background: var(--surface); }
   .eyebrow { color: var(--primary-strong); font-size: var(--step--1); font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; }
   .lede { margin-block-start: var(--space-m); color: var(--ink-muted); font-size: var(--step-1); }
+  .publication-filter { padding-block: var(--space-m); border-block-end: 1px solid var(--border); }
+  .publication-filter label { display: grid; gap: var(--space-2xs); max-width: 18rem; color: var(--ink-muted); font-size: var(--step--1); font-weight: 680; }
+  .publication-filter select { border: 1px solid var(--border); border-radius: 0.25rem; background: var(--surface); color: var(--ink); font: inherit; padding: var(--space-2xs) var(--space-xs); }
   .year-group + .year-group { margin-block-start: var(--space-xl); }
   .year-group h2 { margin-block-end: var(--space-m); }
 </style>

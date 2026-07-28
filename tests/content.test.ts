@@ -1,10 +1,14 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, test } from "vitest";
 
 import {
+  canFilterPublications,
   filterPublicEntries,
+  filterPublications,
+  publicationFilterOptions,
   sortByDateDescending,
   takeFeatured,
 } from "../src/lib/content";
@@ -78,6 +82,79 @@ describe("content selectors", () => {
       "middle-featured",
     ]);
   });
+  test("does not offer a publication filter below the public-entry threshold", () => {
+    const publications = Array.from({ length: 7 }, (_, index) => ({
+      id: `publication-${index}`,
+      data: {
+        date: new Date(`202${index % 2}-01-01T00:00:00.000Z`),
+        draft: false,
+        featured: false,
+        type: index % 2 === 0 ? "Article" : "Preprint",
+      },
+    }));
+
+    expect(canFilterPublications(publications, "type")).toBe(false);
+  });
+
+  test("does not offer a publication filter when its chosen dimension has one meaningful value", () => {
+    const publications = Array.from({ length: 8 }, (_, index) => ({
+      id: `publication-${index}`,
+      data: {
+        date: new Date(`202${index % 3}-01-01T00:00:00.000Z`),
+        draft: false,
+        featured: false,
+        type: "Manuscript",
+      },
+    }));
+
+    expect(canFilterPublications(publications, "type")).toBe(false);
+  });
+
+  test("offers and applies a publication filter for eight public entries with two types", () => {
+    const publications = [
+      { id: "old-article", type: "Article", year: 2023, draft: false },
+      { id: "new-preprint", type: "Preprint", year: 2025, draft: false },
+      { id: "middle-article", type: "Article", year: 2024, draft: false },
+      { id: "draft", type: "Preprint", year: 2026, draft: true },
+      ...Array.from({ length: 5 }, (_, index) => ({
+        id: `other-${index}`,
+        type: index % 2 === 0 ? "Article" : "Preprint",
+        year: 2022,
+        draft: false,
+      })),
+    ].map(({ id, type, year, draft }) => ({
+      id,
+      data: {
+        date: new Date(`${year}-01-01T00:00:00.000Z`),
+        draft,
+        featured: false,
+        type,
+      },
+    }));
+    const publicPublications = filterPublicEntries(publications);
+
+    expect(sortByDateDescending(publications).map(({ id }) => id)).toEqual([
+      "draft",
+      "new-preprint",
+      "middle-article",
+      "old-article",
+      "other-0",
+      "other-1",
+      "other-2",
+      "other-3",
+      "other-4",
+    ]);
+    expect(canFilterPublications(publicPublications, "type")).toBe(true);
+    expect(publicationFilterOptions(publications, "type")).toEqual([
+      "Article",
+      "Preprint",
+    ]);
+    expect(
+      filterPublications(publicPublications, "type", "Preprint").map(
+        ({ id }) => id,
+      ),
+    ).toEqual(["new-preprint", "other-1", "other-3"]);
+  });
 });
 
 describe("content schemas", () => {
@@ -100,5 +177,24 @@ describe("content schemas", () => {
     expect(readSource("src/content.config.ts")).toContain(
       "project.heroAlt?.trim()",
     );
+  });
+});
+
+describe("resume privacy ignore", () => {
+  const isIgnored = (path: string) => {
+    try {
+      execFileSync("git", ["check-ignore", "--quiet", "--", path], {
+        cwd: resolve(import.meta.dirname, ".."),
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  test("ignores only the resume PDF at the root", () => {
+    expect(isIgnored("Yu_Ryan_Resume.pdf")).toBe(true);
+    expect(isIgnored("public/Yu_Ryan_Resume.pdf")).toBe(false);
+    expect(isIgnored("public/cv/Yu_Ryan_Resume.pdf")).toBe(false);
   });
 });

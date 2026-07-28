@@ -1,18 +1,13 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
+import { formatBehavioralDate } from "../lib/dates";
+
 export interface Props {
   publications: CollectionEntry<"publications">[];
 }
 
 const { publications } = Astro.props;
-
-const formatDate = (date: Date, precision: "year" | "month" | "day") => {
-  const options: Intl.DateTimeFormatOptions = { timeZone: "UTC", year: "numeric" };
-  if (precision === "month" || precision === "day") options.month = "long";
-  if (precision === "day") options.day = "numeric";
-  return new Intl.DateTimeFormat("en-US", options).format(date);
-};
 
 const linkLabels: Record<string, string> = {
   doi: "DOI",
@@ -33,16 +28,20 @@ const availableLinks = (publication: CollectionEntry<"publications">) =>
   {
     publications.map((publication) => {
       const links = availableLinks(publication);
+      const formattedDate = formatBehavioralDate(
+        publication.data.date,
+        publication.data.datePrecision,
+      );
 
       return (
-        <li class="publication-item">
+        <li class="publication-item" data-publication-type={publication.data.type}>
           <p class="publication-authors">{publication.data.authors.join(", ")}</p>
           <p class="publication-title"><cite>{publication.data.title}</cite></p>
           <p class="publication-meta">
             <span>{publication.data.status}</span>
             <span aria-hidden="true">·</span>
-            <time datetime={publication.data.date.toISOString().slice(0, 10)}>
-              {formatDate(publication.data.date, publication.data.datePrecision)}
+            <time datetime={formattedDate.datetime}>
+              {formattedDate.visible}
             </time>
             {publication.data.venue && <span aria-hidden="true">·</span>}
             {publication.data.venue && <span>{publication.data.venue}</span>}

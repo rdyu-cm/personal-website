@@ -163,7 +163,7 @@ test("each public project route renders required headings and year-only dates", 
   }
 });
 
-test("papers page groups public outputs by year and retains their publication status", async ({
+test("papers page preserves publication authors, status, and year-only date precision", async ({
   page,
 }) => {
   await page.goto("/papers");
@@ -181,6 +181,13 @@ test("papers page groups public outputs by year and retains their publication st
     ),
   ).toBeVisible();
   await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Ryan Yu, Amy-Doan Vo, Soo-Kyung Kim, William Goddard III", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.locator("time[datetime='2025']")).toHaveText("2025");
+  await expect(page.locator("time[datetime='2025-01-01']")).toHaveCount(0);
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
   await expect(page.getByRole("combobox")).toHaveCount(0);
 });
