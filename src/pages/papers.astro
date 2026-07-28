@@ -8,6 +8,7 @@ import {
   publicationFilterOptions,
   sortByDateDescending,
 } from "../lib/content";
+import { buildScholarlyArticleJsonLd } from "../lib/structured-data";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const publications = sortByDateDescending(
@@ -21,11 +22,17 @@ const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
 const filterDimension = "type";
 const filterOptions = publicationFilterOptions(publications, filterDimension);
 const showFilter = canFilterPublications(publications, filterDimension);
+const papersUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const scholarlyJsonLd = publications.flatMap((publication) => {
+  const jsonLd = buildScholarlyArticleJsonLd(publication, papersUrl);
+  return jsonLd ? [jsonLd] : [];
+});
 ---
 
 <BaseLayout
   title="Papers"
   description="Public manuscripts and research outputs by Ryan Yu."
+  jsonLd={scholarlyJsonLd.length > 0 ? scholarlyJsonLd : undefined}
 >
   <section class="page-header">
     <div class="container">
@@ -63,14 +70,16 @@ const showFilter = canFilterPublications(publications, filterDimension);
   </section>
   <script>
     const filter = document.querySelector<HTMLSelectElement>("[data-publication-filter]");
+    import { normalizePublicationType } from "../lib/content";
+
 
     filter?.addEventListener("change", () => {
-      const selectedType = filter.value;
+      const selectedType = normalizePublicationType(filter.value);
       const publications = document.querySelectorAll<HTMLElement>("[data-publication-type]");
 
       publications.forEach((publication) => {
         publication.hidden =
-          selectedType !== "all" && publication.dataset.publicationType !== selectedType;
+          selectedType !== "all" && normalizePublicationType(publication.dataset.publicationType ?? "") !== selectedType;
       });
       document.querySelectorAll<HTMLElement>(".year-group").forEach((group) => {
         group.hidden = !group.querySelector("[data-publication-type]:not([hidden])");

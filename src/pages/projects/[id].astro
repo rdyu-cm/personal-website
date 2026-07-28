@@ -192,7 +192,7 @@ const links = Object.entries(data.links ?? {}).flatMap(([key, href]) =>
   }
   @media (max-width: 42rem) {
     .case-study__hero-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .case-study__grid {
       gap: var(--space-m);

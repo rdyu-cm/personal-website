@@ -26,7 +26,7 @@ type FilterablePublication = Entry & {
 
 export type PublicationFilterDimension = "type";
 
-const normalizeFilterValue = (value: string) => value.trim();
+export const normalizePublicationType = (value: string) => value.trim();
 
 export const publicationFilterOptions = <T extends FilterablePublication>(
   xs: T[],
@@ -34,7 +34,9 @@ export const publicationFilterOptions = <T extends FilterablePublication>(
 ) =>
   [
     ...new Set(
-      xs.map((entry) => normalizeFilterValue(entry.data.type)).filter(Boolean),
+      xs
+        .map((entry) => normalizePublicationType(entry.data.type))
+        .filter(Boolean),
     ),
   ].sort((a, b) => a.localeCompare(b));
 
@@ -48,11 +50,12 @@ export const filterPublications = <T extends FilterablePublication>(
   _dimension: PublicationFilterDimension,
   value: string,
 ) => {
-  const normalizedValue = normalizeFilterValue(value);
+  const normalizedValue = normalizePublicationType(value);
 
   return normalizedValue === "all"
     ? xs
     : xs.filter(
-        (entry) => normalizeFilterValue(entry.data.type) === normalizedValue,
+        (entry) =>
+          normalizePublicationType(entry.data.type) === normalizedValue,
       );
 };

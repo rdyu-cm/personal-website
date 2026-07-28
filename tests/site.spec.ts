@@ -1,4 +1,76 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+const auditedPaths = [
+  "/",
+  "/research",
+  "/projects",
+  "/projects/nitrate-reduction-electrolytes",
+  "/projects/smoothened-gi",
+  "/papers",
+  "/about",
+  "/cv",
+];
+
+test.describe("accessibility regression checks", () => {
+  test("public pages have no Axe violations", async ({ page }) => {
+    for (const path of auditedPaths) {
+      await page.goto(path);
+      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    }
+  });
+
+  test("public pages do not overflow a 320px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    for (const path of auditedPaths) {
+      await page.goto(path);
+      expect(
+        await page
+          .locator("html")
+          .evaluate(
+            (element: HTMLElement) =>
+              element.scrollWidth <= element.clientWidth,
+          ),
+      ).toBe(true);
+    }
+  });
+
+  test("research images have meaningful alternative text", async ({ page }) => {
+    await page.goto("/research");
+    const researchImages = page.locator("main img");
+    for (let image = 0; image < (await researchImages.count()); image += 1) {
+      await expect(researchImages.nth(image)).toHaveAttribute("alt", /\S/);
+    }
+  });
+
+  test("public pages do not skip heading levels", async ({ page }) => {
+    for (const path of auditedPaths) {
+      await page.goto(path);
+      const levels = await page
+        .locator("main :is(h1, h2, h3, h4, h5, h6)")
+        .evaluateAll((headings) =>
+          headings.map((heading) => Number(heading.tagName.slice(1))),
+        );
+      expect(levels[0]).toBe(1);
+      for (let index = 1; index < levels.length; index += 1) {
+        expect(levels[index]).toBeLessThanOrEqual(levels[index - 1] + 1);
+      }
+    }
+  });
+
+  test("research workflow remains visible with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/research");
+    await expect(
+      page.getByRole("list", { name: "Research workflow" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Physical insight", { exact: true }),
+    ).toBeVisible();
+  });
+});
 
 test("shared shell exposes page landmarks", async ({ page }) => {
   await page.goto("/");
@@ -190,6 +262,12 @@ test("papers page preserves publication authors, status, and year-only date prec
   await expect(page.locator("time[datetime='2025-01-01']")).toHaveCount(0);
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
   await expect(page.getByRole("combobox")).toHaveCount(0);
+  const publicationTypes = page.locator("[data-publication-type]");
+  await expect(publicationTypes).toHaveCount(1);
+  await expect(publicationTypes.first()).toHaveAttribute(
+    "data-publication-type",
+    "Manuscript",
+  );
 });
 
 test("about page presents the approved research trajectory without vanity content", async ({

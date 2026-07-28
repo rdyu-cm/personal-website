@@ -8,6 +8,7 @@ import {
   canFilterPublications,
   filterPublicEntries,
   filterPublications,
+  normalizePublicationType,
   publicationFilterOptions,
   sortByDateDescending,
   takeFeatured,
@@ -44,6 +45,10 @@ const entries = [
 ];
 
 describe("content selectors", () => {
+  test("normalizes publication types by trimming surrounding whitespace", () => {
+    expect(normalizePublicationType("  Preprint \n")).toBe("Preprint");
+  });
+
   test("excludes draft entries", () => {
     expect(filterPublicEntries(entries).map((entry) => entry.id)).toEqual([
       "earlier-featured",

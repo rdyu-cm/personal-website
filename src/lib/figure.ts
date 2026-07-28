@@ -24,11 +24,29 @@ export const validateFigure = ({
 
 export const resolveFigureSource = (src: string, base: string) => {
   if (/^https?:\/\//i.test(src)) return src;
+
+  let decodedSource: string;
+  try {
+    decodedSource = decodeURIComponent(src);
+  } catch {
+    throw new Error(
+      "Local Figure source must remain within the deployment base.",
+    );
+  }
+  if (decodedSource.includes(".."))
+    throw new Error(
+      "Local Figure source must remain within the deployment base.",
+    );
+
   const baseUrl = new URL(
     base.endsWith("/") ? base : `${base}/`,
     "https://figure.local",
   );
   const resolved = new URL(src.replace(/^\/+/, ""), baseUrl);
+  if (!resolved.pathname.startsWith(baseUrl.pathname))
+    throw new Error(
+      "Local Figure source must remain within the deployment base.",
+    );
 
   return `${resolved.pathname}${resolved.search}${resolved.hash}`;
 };

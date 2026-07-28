@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
+import { normalizePublicationType } from "../lib/content";
 import { formatBehavioralDate } from "../lib/dates";
 
 export interface Props {
@@ -34,7 +35,7 @@ const availableLinks = (publication: CollectionEntry<"publications">) =>
       );
 
       return (
-        <li class="publication-item" data-publication-type={publication.data.type}>
+        <li class="publication-item" data-publication-type={normalizePublicationType(publication.data.type)}>
           <p class="publication-authors">{publication.data.authors.join(", ")}</p>
           <p class="publication-title"><cite>{publication.data.title}</cite></p>
           <p class="publication-meta">

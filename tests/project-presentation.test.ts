@@ -76,4 +76,13 @@ describe("figure contract", () => {
       ),
     ).toBe("https://example.com/figure.png");
   });
+
+  test.each(["../private.png", "images/../private.png", "%2e%2e/private.png"])(
+    "rejects local traversal source %s",
+    (src) => {
+      expect(() => resolveFigureSource(src, "/personal-website/")).toThrow(
+        "deployment base",
+      );
+    },
+  );
 });
