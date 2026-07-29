@@ -21,9 +21,15 @@ const documentTitle = title.includes(profile.name)
   ? title
   : `${title} | ${profile.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
-const socialImage = image
-  ? resolveSocialImage(image, Astro.site ?? Astro.url, import.meta.env.BASE_URL)
-  : undefined;
+const socialImage = resolveSocialImage(
+  image ?? "/social-preview.png",
+  Astro.site ?? Astro.url,
+  import.meta.env.BASE_URL,
+);
+const socialImageAlt =
+  image === undefined
+    ? "Ryan Yu — AI for science and molecular simulation"
+    : `${documentTitle} social preview`;
 const serializedJsonLd = jsonLd ? serializeJsonLd(jsonLd) : undefined;
 ---
 
@@ -36,11 +42,15 @@ const serializedJsonLd = jsonLd ? serializeJsonLd(jsonLd) : undefined;
 <meta property="og:type" content={type} />
 <meta property="og:url" content={canonical} />
 <meta property="og:site_name" content={profile.name} />
-{socialImage && <meta property="og:image" content={socialImage} />}
+<meta property="og:image" content={socialImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={socialImageAlt} />
 
-<meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={documentTitle} />
 <meta name="twitter:description" content={description} />
-{socialImage && <meta name="twitter:image" content={socialImage} />}
+<meta name="twitter:image" content={socialImage} />
+<meta name="twitter:image:alt" content={socialImageAlt} />
 
 {serializedJsonLd && <script is:inline type="application/ld+json" set:html={serializedJsonLd} />}

@@ -86,6 +86,34 @@ test("shared shell exposes page landmarks", async ({ page }) => {
   );
 });
 
+test("shared SEO exposes the Deep Orbit social preview", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+    "content",
+    "#11121c",
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "http://127.0.0.1:4321/social-preview.png",
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    "content",
+    "1200",
+  );
+  await expect(
+    page.locator('meta[property="og:image:height"]'),
+  ).toHaveAttribute("content", "630");
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+    "content",
+    "Ryan Yu — AI for science and molecular simulation",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+});
+
 test("skip link is first in the focus order and moves focus to main", async ({
   page,
 }) => {

@@ -10,6 +10,7 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
+    "social-preview": "node scripts/render-social-preview.mjs",
     "build": "astro check && astro build",
     "preview": "astro preview"
   },
