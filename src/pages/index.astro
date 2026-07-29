@@ -34,25 +34,78 @@ const researchThemes = [
       "Connecting computation to electrochemical interfaces and biomolecular activation mechanisms.",
   },
 ];
+
+const currentResearch = [
+  {
+    id: "rotskoff-protein-representations",
+    lab: "Rotskoff Lab",
+    institution: "Stanford University · June 2026–present",
+  },
+  {
+    id: "nitrate-reduction-electrolytes",
+    lab: "Fong Lab",
+    institution: "Caltech · December 2024–present",
+  },
+  {
+    id: "smoothened-gi",
+    lab: "Goddard Lab",
+    institution: "Caltech · December 2023–present",
+    supplement: "Simulations use GROMACS and PLUMED.",
+  },
+].flatMap((record) => {
+  const project = featuredProjects.find((entry) => entry.id === record.id);
+  return project ? [{ ...record, project }] : [];
+});
 ---
 
 <BaseLayout title={profile.name} description={profile.shortBio} jsonLd={personJsonLd}>
   <section class="home-hero">
-    <div class="container home-hero__grid">
-      <div class="home-hero__identity">
-        <p class="hero-role">Chemical Engineering (Computational) undergraduate at Caltech</p>
-        <h1>{profile.name}</h1>
+    <div class="container home-hero__inner">
+      <ul class="hero-tags" aria-label="Research areas">
+        <li>AI for science</li>
+        <li>Molecular simulation</li>
+      </ul>
+      <h1>{profile.name}</h1>
+      <p class="hero-thesis">
+        Interpretable protein representations, machine-learned potentials, and
+        molecular mechanisms.
+      </p>
+      <a class="button button--secondary" href={toRoute("/research")}>
+        Explore current research
+      </a>
+    </div>
+  </section>
+
+  <section
+    class="current-research"
+    aria-labelledby="current-research-title"
+  >
+    <div class="container">
+      <div class="section-heading section-heading--split">
+        <h2 id="current-research-title">Current Research</h2>
+        <p>
+          Three complementary routes from representation and simulation to
+          mechanism.
+        </p>
       </div>
-      <div class="home-hero__thesis">
-        <p class="hero-thesis">
-          I use AI/ML potentials and molecular simulation to study electrochemical
-          interfaces and biomolecular mechanisms.
-        </p>
-        <p class="workflow-statement">
-          My scientific workflow moves from first-principles data through learned
-          potentials and simulation to physical insight.
-        </p>
-        <a class="button" href={toRoute("/research")}>Explore the research process</a>
+      <div class="research-row-list">
+        {
+          currentResearch.map(({ project, lab, institution, supplement }) => (
+            <article class="research-row">
+              <div>
+                <h3>{lab}</h3>
+                <p class="research-row__meta">{institution}</p>
+              </div>
+              <p>
+                {project.data.summary}
+                {supplement && ` ${supplement}`}
+              </p>
+              <a href={toRoute(`/research#${project.id}`)}>
+                View research<span class="sr-only"> in the {lab}</span>
+              </a>
+            </article>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -125,7 +178,9 @@ const researchThemes = [
           </div>
           <ul aria-label="Contact links">
             {profile.links.map((link) => (
-              <li><a href={link.href}>{link.label}</a></li>
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -136,51 +191,62 @@ const researchThemes = [
 
 <style>
   .home-hero {
-    min-height: clamp(32rem, 74vh, 48rem);
-    display: flex;
-    align-items: center;
-    padding-block: var(--space-xl);
+    padding-block: clamp(3.5rem, 8vw, 5.5rem);
     border-block-end: 1px solid var(--border);
     background: var(--surface);
   }
 
-  .home-hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
-    align-items: end;
-    gap: var(--space-l) var(--space-xl);
+  .home-hero__inner {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .home-hero__identity {
-    padding-block-start: var(--space-l);
-    border-block-start: 0.3rem solid var(--accent);
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    list-style: none;
   }
 
-  .hero-role {
-    max-width: 34rem;
-    margin-block-end: var(--space-s);
+  .hero-tags li {
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--primary);
+    border-radius: 999px;
     color: var(--primary-strong);
-    font-weight: 720;
+    background: color-mix(in oklch, var(--primary) 18%, var(--surface));
+    font-weight: 680;
   }
 
-  .home-hero__thesis { max-width: 39rem; }
+  .hero-tags li:nth-child(2) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in oklch, var(--accent) 14%, var(--surface));
+  }
 
   .hero-thesis {
+    max-width: 42rem;
+    margin-block-start: var(--space-m);
     font-size: var(--step-2);
     font-weight: 660;
     line-height: 1.28;
     letter-spacing: -0.02em;
   }
 
-  .workflow-statement {
-    margin-block-start: var(--space-m);
-    padding-block: var(--space-s);
-    border-block: 1px solid var(--border);
-    color: var(--ink-muted);
+  .home-hero .button { margin-block-start: var(--space-m); }
+
+  .current-research,
+  .home-section {
+    padding-block: var(--space-xl);
   }
 
-  .home-hero .button { margin-block-start: var(--space-m); }
-  .home-section { padding-block: var(--space-xl); }
+  .current-research {
+    border-block-end: 1px solid var(--border);
+    background: var(--canvas);
+  }
+
   .research-interests, .outputs { background: var(--canvas); }
 
   .selected-work {
@@ -205,6 +271,41 @@ const researchThemes = [
   .section-heading--split p {
     max-width: 32rem;
     margin-block-start: 0;
+  }
+
+  .research-row-list {
+    border-block-start: 1px solid var(--border);
+  }
+
+  .research-row {
+    display: grid;
+    grid-template-columns: minmax(11rem, 0.34fr) minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-s) var(--space-l);
+    padding-block: var(--space-m);
+    border-block-end: 1px solid var(--border);
+  }
+
+  .research-row h3 {
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .research-row__meta {
+    margin-block-start: var(--space-xs);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+  }
+
+  .research-row > p {
+    max-width: 50rem;
+    color: var(--ink-muted);
+    font-size: var(--step-0);
+  }
+
+  .research-row > a {
+    font-weight: 720;
+    white-space: nowrap;
   }
 
   .theme-list {
@@ -277,9 +378,8 @@ const researchThemes = [
   }
 
   @media (max-width: 48rem) {
-    .home-hero__grid {
+    .research-row {
       grid-template-columns: 1fr;
-      align-items: start;
     }
 
     .section-heading--split,
@@ -299,7 +399,6 @@ const researchThemes = [
   }
 
   @media (max-width: 24rem) {
-    .home-hero { min-height: 0; }
     .hero-thesis { font-size: var(--step-1); }
   }
 </style>

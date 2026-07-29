@@ -131,19 +131,53 @@ test("homepage presents the public research overview with one primary heading", 
 }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   await expect(
-    page.getByRole("heading", { name: "Research interests" }),
+    page.getByRole("heading", { level: 1, name: "Ryan Yu" }),
+  ).toHaveCount(1);
+  const researchAreas = page.getByRole("list", { name: "Research areas" });
+  await expect(
+    researchAreas.getByText("AI for science", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    researchAreas.getByText("Molecular simulation", { exact: true }),
   ).toBeVisible();
   await expect(
     page.getByText(
-      "Chemical Engineering (Computational) undergraduate at Caltech",
-      { exact: false },
+      "Interpretable protein representations, machine-learned potentials, and molecular mechanisms.",
+      { exact: true },
     ),
   ).toBeVisible();
+
+  const currentResearch = page.getByRole("region", {
+    name: "Current Research",
+  });
+  const researchRows = currentResearch.getByRole("article");
+  await expect(researchRows).toHaveCount(3);
+  for (const [index, lab] of [
+    "Rotskoff Lab",
+    "Fong Lab",
+    "Goddard Lab",
+  ].entries()) {
+    await expect(researchRows.nth(index)).toContainText(lab);
+  }
+  await expect(researchRows.nth(0)).toContainText("BioEmu and ESM3");
+  await expect(researchRows.nth(1)).toContainText("LAMMPS and CP2K");
+  await expect(researchRows.nth(2)).toContainText("GROMACS and PLUMED");
   await expect(
-    page.getByRole("link", { name: "Explore the research process" }),
-  ).toHaveAttribute("href", "/research");
+    page.getByRole("link", { name: "Ryan Yu on LinkedIn" }),
+  ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
+
+  const researchCopySize = await researchRows
+    .first()
+    .locator(":scope > p")
+    .evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize),
+    );
+  expect(researchCopySize).toBeGreaterThanOrEqual(16);
+
+  await expect(
+    page.getByRole("heading", { name: "Research interests" }),
+  ).toBeVisible();
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
   await expect(
     page.getByRole("article").filter({
@@ -161,7 +195,7 @@ test("homepage presents the public research overview with one primary heading", 
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(page.getByText("Published", { exact: true })).toBeVisible();
   await expect(page.locator(".publication-list")).toHaveAttribute(
     "role",
     "list",
