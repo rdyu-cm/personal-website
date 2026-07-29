@@ -78,21 +78,28 @@ and CI when the custom domain is chosen; do not change DNS as part of this
 repository workflow. The default and CI value should remain the GitHub Pages
 URL until that decision is made.
 
-## Cloudflare Pages handoff
+## Cloudflare Workers handoff
 
-When Cloudflare access is available, create a Pages project from Git repository
-`rdyu-cm/personal-website` with:
+The site deploys as native Workers Static Assets; it does not use Astro SSR or
+the `@astrojs/cloudflare` adapter. Connect Git repository
+`rdyu-cm/personal-website` to Worker `rdyu-site` with:
 
-| Setting                | Value                                          |
-| ---------------------- | ---------------------------------------------- |
-| Production branch      | `main`                                         |
-| Build command          | `npm run build`                                |
-| Build output directory | `dist`                                         |
-| Node.js version        | 22.12 or newer                                 |
-| Environment variable   | `SITE_URL` = the eventual public canonical URL |
-| Preview behavior       | Enable preview builds for feature branches/PRs |
+| Setting                       | Value                                             |
+| ----------------------------- | ------------------------------------------------- |
+| Production branch             | `main`                                            |
+| Build command                 | `npm run build`                                   |
+| Deploy command                | `npx wrangler@latest deploy`                      |
+| Non-production deploy command | `npx wrangler@latest versions upload`             |
+| Root directory                | `/`                                               |
+| Node.js version               | 22.12 or newer                                    |
+| Environment variable          | `SITE_URL` = the eventual public canonical URL    |
+| Preview behavior              | Enable preview builds for feature branches or PRs |
 
-Do not connect a custom domain or alter DNS during this setup. Cloudflare
+`wrangler.jsonc` points Workers at the generated `dist` directory and contains
+no `main` entry point, so no Worker runtime code or Astro server adapter is
+needed. Pushes to `main` automatically build and deploy through Workers Builds.
+
+Do not connect a custom domain or alter DNS during initial setup. Cloudflare
 credentials and the GitHub integration are external prerequisites; this
 repository does not contain them.
 
