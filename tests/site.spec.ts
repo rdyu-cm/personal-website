@@ -113,12 +113,14 @@ test("primary navigation identifies home as the current page", async ({
     ["Projects", "/projects"],
     ["Papers", "/papers"],
     ["About", "/about"],
-    ["CV", "/cv"],
   ]) {
     await expect(
       navigation.getByRole("link", { name, exact: true }),
     ).toHaveAttribute("href", href);
   }
+  await expect(
+    navigation.getByRole("link", { name: "CV", exact: true }),
+  ).toHaveCount(0);
   await expect(
     navigation.getByRole("link", { name: "Home", exact: true }),
   ).toHaveAttribute("aria-current", "page");
@@ -304,17 +306,15 @@ test("about Person JSON-LD uses Astro's configured canonical site", async ({
   ).toMatchObject({ url: "http://127.0.0.1:4321/" });
 });
 
-test("CV is a contactable HTML summary without a PDF or phone number", async ({
+test("CV route uses the branded not-found page without private contact data", async ({
   page,
 }) => {
-  await page.goto("/cv");
+  const response = await page.goto("/cv");
 
+  expect(response?.status()).toBe(404);
   await expect(
-    page.getByRole("heading", { level: 1, name: "Curriculum vitae" }),
+    page.getByRole("heading", { level: 1, name: "Page not found" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("main").getByRole("link", { name: "Email Ryan Yu" }),
-  ).toHaveAttribute("href", "mailto:rdyu@caltech.edu");
   await expect(page.locator('a[href$=".pdf"]')).toHaveCount(0);
   await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   await expect(page.locator("body")).not.toContainText(
