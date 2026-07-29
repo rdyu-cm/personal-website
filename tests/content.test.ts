@@ -248,9 +248,7 @@ describe("current public research record", () => {
   test("adds LinkedIn and keeps private contact fields absent", () => {
     const profile = readSource("src/data/profile.ts");
 
-    expect(profile).toContain(
-      "https://www.linkedin.com/in/ryan-yu-0bb27a23b",
-    );
+    expect(profile).toContain("https://www.linkedin.com/in/ryan-yu-0bb27a23b");
     expect(profile).not.toMatch(/\b\d{3}[-.)\s]\d{3}[-.]\d{4}\b/);
     expect(profile).not.toContain("cvPath");
   });
