@@ -170,12 +170,15 @@ describe("content schemas", () => {
       schema.match(/datePrecision: z\.enum\(\["year", "month", "day"\]\)/g),
     ).toHaveLength(2);
     for (const record of [
+      "src/content/projects/rotskoff-protein-representations.md",
       "src/content/projects/smoothened-gi.md",
       "src/content/projects/nitrate-reduction-electrolytes.md",
-      "src/content/publications/smoothened-ligand-activation.md",
     ]) {
-      expect(readSource(record)).toContain("datePrecision: year");
+      expect(readSource(record)).toContain("datePrecision: month");
     }
+    expect(
+      readSource("src/content/publications/smoothened-ligand-activation.md"),
+    ).toContain("datePrecision: year");
   });
 
   test("uses lowercase publication type enums", () => {
@@ -207,5 +210,48 @@ describe("resume privacy ignore", () => {
     expect(isIgnored("Yu_Ryan_Resume.pdf")).toBe(true);
     expect(isIgnored("public/Yu_Ryan_Resume.pdf")).toBe(false);
     expect(isIgnored("public/cv/Yu_Ryan_Resume.pdf")).toBe(false);
+  });
+});
+
+describe("current public research record", () => {
+  test("publishes the three current research projects in newest-first order", () => {
+    const records = [
+      "src/content/projects/rotskoff-protein-representations.md",
+      "src/content/projects/nitrate-reduction-electrolytes.md",
+      "src/content/projects/smoothened-gi.md",
+    ].map(readSource);
+
+    expect(records[0]).toContain("date: 2026-06-01");
+    expect(records[0]).toContain("BioEmu and ESM3");
+    expect(records[1]).toContain("date: 2024-12-01");
+    expect(records[1]).toContain("LAMMPS and CP2K");
+    expect(records[2]).toContain("date: 2023-12-01");
+    expect(records[2]).toContain("GROMACS and PLUMED");
+  });
+
+  test("publishes the PNAS article and DOI", () => {
+    const publication = readSource(
+      "src/content/publications/smoothened-ligand-activation.md",
+    );
+
+    expect(publication).toContain('type: "journal"');
+    expect(publication).toContain('status: "Published"');
+    expect(publication).toContain("date: 2026-01-01");
+    expect(publication).toContain(
+      'venue: "Proceedings of the National Academy of Sciences"',
+    );
+    expect(publication).toContain(
+      'doi: "https://doi.org/10.1073/pnas.2604658123"',
+    );
+  });
+
+  test("adds LinkedIn and keeps private contact fields absent", () => {
+    const profile = readSource("src/data/profile.ts");
+
+    expect(profile).toContain(
+      "https://www.linkedin.com/in/ryan-yu-0bb27a23b",
+    );
+    expect(profile).not.toMatch(/\b\d{3}[-.)\s]\d{3}[-.]\d{4}\b/);
+    expect(profile).not.toContain("cvPath");
   });
 });

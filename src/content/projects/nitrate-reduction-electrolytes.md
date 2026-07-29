@@ -1,16 +1,16 @@
 ---
 title: "Machine-learned potentials for nitrate-reduction electrolytes"
-summary: "Machine-learned potential development for water, nitrate, and alkali-cation bulk electrolytes and TiH2/electrolyte interfaces."
-date: 2024-01-01
-datePrecision: year
-status: "Ongoing"
+summary: "Molecular dynamics and density functional theory calculations in LAMMPS and CP2K for a MACE machine-learned interatomic potential at nitrate-reduction interfaces."
+date: 2024-12-01
+datePrecision: month
+status: "Ongoing · Fong Lab, Caltech"
 themes:
   - "Machine-learned potentials"
   - "Electrochemical interfaces"
   - "Nitrate reduction"
-role: "Researcher"
+role: "Student Researcher"
 featured: true
 draft: false
 ---
 
-In the Fong Lab, I use MACE, molecular dynamics, and density functional theory to develop a machine-learned potential for water, nitrate, and alkali-cation bulk electrolytes for nitrate reduction. I am also developing a potential for the TiH2/electrolyte interface to study nitrate interfacial distributions.
+In the Fong Lab, I conduct molecular dynamics and density functional theory calculations in LAMMPS and CP2K to train a MACE machine-learned interatomic potential for the interfacial environment in electrochemical nitrate reduction. The work includes aqueous nitrate and alkali-cation electrolytes and the TiH2/electrolyte interface.

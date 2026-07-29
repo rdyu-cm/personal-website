@@ -5,7 +5,6 @@ export interface Profile {
   shortBio: string;
   longBio: string[];
   links: { label: string; href: string }[];
-  cvPath?: string;
   domain: string;
 }
 
@@ -18,15 +17,19 @@ export const profile = defineProfile({
   headline: "Chemical Engineering Undergraduate · AI for Science",
   affiliation: "California Institute of Technology",
   shortBio:
-    "Chemical Engineering (Computational) undergraduate at Caltech researching molecular simulation, machine-learned potentials, and electrochemical interfaces.",
+    "Caltech Chemical Engineering (Computational) undergraduate working across interpretable protein representations, machine-learned interatomic potentials, and molecular simulation.",
   longBio: [
     "Ryan Yu is a Chemical Engineering (Computational) undergraduate at the California Institute of Technology, studying from 2023 to 2027.",
-    "In the Goddard Lab, Ryan uses molecular dynamics and metadynamics to study Smoothened/Gi activation. In the Fong Lab, Ryan develops machine-learning potentials for nitrate-reduction electrolytes and TiH2/electrolyte interfaces.",
-    "Ryan also completed a data-science project on machine-learning prediction of LSER parameters for volatile organic compound soil partitioning.",
+    "In the Rotskoff Lab at Stanford, Ryan trains sparse autoencoders on BioEmu and ESM3 representations to identify interpretable features of protein structure and conformational distributions.",
+    "At Caltech, Ryan develops machine-learned interatomic potentials for nitrate-reduction electrolytes in the Fong Lab and studies the Smoothened activation mechanism with molecular dynamics and metadynamics in the Goddard Lab.",
   ],
   links: [
     { label: "Email", href: "mailto:rdyu@caltech.edu" },
     { label: "GitHub", href: "https://github.com/rdyu-cm" },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/ryan-yu-0bb27a23b",
+    },
   ],
   domain: "https://rdyu-cm.github.io/personal-website",
 });

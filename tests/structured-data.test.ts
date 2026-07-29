@@ -14,6 +14,7 @@ const publication = (
     venue: string;
     date: Date;
     datePrecision: "year" | "month" | "day";
+    links: { doi?: string };
   }> = {},
 ) => ({
   id: "example-publication",
@@ -43,7 +44,10 @@ describe("buildPersonJsonLd", () => {
         "@type": "Organization",
         name: "California Institute of Technology",
       },
-      sameAs: ["https://github.com/rdyu-cm"],
+      sameAs: [
+        "https://github.com/rdyu-cm",
+        "https://www.linkedin.com/in/ryan-yu-0bb27a23b",
+      ],
     });
   });
 
@@ -68,25 +72,24 @@ describe("buildPersonJsonLd", () => {
 
 describe("buildScholarlyArticleJsonLd", () => {
   test("represents a published journal record with its verified periodical", () => {
-    expect(
-      buildScholarlyArticleJsonLd(
-        publication(),
-        "https://example.com/papers#example-publication",
-      ),
-    ).toEqual({
-      "@context": "https://schema.org",
+    const article = buildScholarlyArticleJsonLd(
+      publication({
+        date: new Date("2026-01-01T00:00:00.000Z"),
+        datePrecision: "year",
+        venue: "Proceedings of the National Academy of Sciences",
+        links: { doi: "https://doi.org/10.1073/pnas.2604658123" },
+      }),
+      "https://example.com/papers#example-publication",
+    );
+
+    expect(article).toMatchObject({
       "@type": "ScholarlyArticle",
-      headline: "A careful scientific record",
-      author: [
-        { "@type": "Person", name: "Ryan Yu" },
-        { "@type": "Person", name: "Example Collaborator" },
-      ],
-      url: "https://example.com/papers#example-publication",
-      datePublished: "2025-03-14",
+      datePublished: "2026",
       isPartOf: {
         "@type": "Periodical",
-        name: "Example Journal",
+        name: "Proceedings of the National Academy of Sciences",
       },
+      sameAs: "https://doi.org/10.1073/pnas.2604658123",
     });
   });
 

@@ -10,6 +10,9 @@ type PublicationEntry = {
     type: string;
     status: string;
     venue?: string;
+    links?: {
+      doi?: string;
+    };
   };
 };
 export const publicationFragmentId = (entryId: string) =>
@@ -78,5 +81,6 @@ export const buildScholarlyArticleJsonLd = (
           },
         }
       : {}),
+    ...(entry.data.links?.doi ? { sameAs: entry.data.links.doi } : {}),
   };
 };
