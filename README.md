@@ -1,7 +1,7 @@
 # Ryan Yu research website
 
 Static Astro site for Ryan Yu's research profile. The current public canonical
-URL is `https://rdyu-cm.github.io/personal-website`.
+URL is `https://site.rdyu-cm.workers.dev`.
 
 ## Setup and scripts
 
@@ -61,9 +61,9 @@ Do not add a phone number to the CV or other public content.
 
 ## Canonical URL and deployment base
 
-`SITE_URL` controls Astro's `site` and derived deployment `base`. With the
-default `https://rdyu-cm.github.io/personal-website`, generated routes use the
-`/personal-website` base and canonical URLs, sitemap, robots sitemap URL, and
+`SITE_URL` controls Astro's `site` and derived deployment `base`. The default
+`https://site.rdyu-cm.workers.dev` is a root deployment, so generated assets and
+routes have no path prefix. Canonical URLs, sitemap, robots sitemap URL, and
 homepage Person JSON-LD use that public URL.
 
 For a future root-domain deployment, set `SITE_URL` to the final HTTPS origin
@@ -73,10 +73,9 @@ without a path, for example:
 SITE_URL=https://research.example.com npm run build
 ```
 
-This produces no Astro base path. Use the identical value in Cloudflare Pages
-and CI when the custom domain is chosen; do not change DNS as part of this
-repository workflow. The default and CI value should remain the GitHub Pages
-URL until that decision is made.
+This produces no Astro base path. Use the identical value in Cloudflare Workers
+Builds and CI when the custom domain is chosen; do not change DNS as part of
+this repository workflow.
 
 ## Cloudflare Workers handoff
 
