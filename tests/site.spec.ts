@@ -135,6 +135,7 @@ test("homepage presents the public research overview with one primary heading", 
     page.getByRole("heading", { level: 1, name: "Ryan Yu" }),
   ).toHaveCount(1);
   const researchAreas = page.getByRole("list", { name: "Research areas" });
+  await expect(page.locator(".hero-tags li")).toHaveCount(2);
   await expect(
     researchAreas.getByText("AI for science", { exact: true }),
   ).toBeVisible();
@@ -167,13 +168,17 @@ test("homepage presents the public research overview with one primary heading", 
     page.getByRole("link", { name: "Ryan Yu on LinkedIn" }),
   ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
 
-  const researchCopySize = await researchRows
-    .first()
+  const researchCopySizes = await researchRows
     .locator(":scope > p")
-    .evaluate((element) =>
-      Number.parseFloat(getComputedStyle(element).fontSize),
+    .evaluateAll((elements) =>
+      elements.map((element) =>
+        Number.parseFloat(getComputedStyle(element).fontSize),
+      ),
     );
-  expect(researchCopySize).toBeGreaterThanOrEqual(16);
+  expect(researchCopySizes).toHaveLength(3);
+  for (const researchCopySize of researchCopySizes) {
+    expect(researchCopySize).toBeGreaterThanOrEqual(16);
+  }
 
   await expect(
     page.getByRole("heading", { name: "Research interests" }),
@@ -195,7 +200,45 @@ test("homepage presents the public research overview with one primary heading", 
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByText("Published", { exact: true })).toBeVisible();
+  const smoothenedPublication = page.locator(".publication-item").filter({
+    has: page.getByText(
+      "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
+      { exact: true },
+    ),
+  });
+  await expect(
+    smoothenedPublication.getByText("Published", { exact: true }),
+  ).toBeVisible();
+  for (const selector of [".publication-authors", ".publication-links a"]) {
+    const copySizes = await smoothenedPublication
+      .locator(selector)
+      .evaluateAll((elements) =>
+        elements.map((element) =>
+          Number.parseFloat(getComputedStyle(element).fontSize),
+        ),
+      );
+    expect(copySizes.length).toBeGreaterThan(0);
+    for (const copySize of copySizes) {
+      expect(copySize).toBeGreaterThanOrEqual(16);
+    }
+  }
+
+  const contactPadding = await page
+    .locator(".contact-band")
+    .evaluate((element) => {
+      const probe = document.createElement("div");
+      probe.style.paddingBlockStart = "var(--space-xl)";
+      element.append(probe);
+      const expected = Number.parseFloat(
+        getComputedStyle(probe).paddingBlockStart,
+      );
+      probe.remove();
+      return {
+        actual: Number.parseFloat(getComputedStyle(element).paddingBlockStart),
+        expected,
+      };
+    });
+  expect(contactPadding.actual).toBeCloseTo(contactPadding.expected);
   await expect(page.locator(".publication-list")).toHaveAttribute(
     "role",
     "list",
