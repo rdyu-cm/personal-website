@@ -13,7 +13,7 @@ const projects = sortByDateDescending(
 
 <BaseLayout
   title="Projects"
-  description="Research project records spanning molecular simulation and electrochemical interfaces."
+  description="Research project records spanning interpretable protein representations, molecular simulation, and electrochemical interfaces."
 >
   <header class="projects-hero">
     <div class="container">
@@ -58,7 +58,7 @@ const projects = sortByDateDescending(
 
 <style>
   .projects-hero {
-    padding-block: var(--space-xl) var(--space-l);
+    padding-block: var(--space-l);
     border-block-end: 1px solid var(--border);
     background: var(--surface);
   }
@@ -77,7 +77,7 @@ const projects = sortByDateDescending(
   }
 
   .projects-section {
-    padding-block: var(--space-xl);
+    padding-block: var(--space-l);
   }
 
   .projects-section__heading {
@@ -91,6 +91,10 @@ const projects = sortByDateDescending(
   .projects-section__heading p,
   .empty-state {
     color: var(--ink-muted);
+  }
+
+  .projects-section__heading h2 {
+    font-size: var(--step-2);
   }
 
   .project-grid {

@@ -269,6 +269,24 @@ test("research page explains the ordered data-to-insight workflow", async ({
     }),
   ).toBeVisible();
   await expect(flow).toHaveAttribute("role", "list");
+  for (const [index, heading] of [
+    "Interpretable protein representations",
+    "Machine-learned potentials for nitrate-reduction electrolytes",
+    "Smoothened/Gi activation mechanism",
+  ].entries()) {
+    await expect(page.locator(".research-track h2").nth(index)).toHaveText(
+      heading,
+    );
+  }
+  await expect(
+    page.getByText("BioEmu and ESM3", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("LAMMPS and CP2K", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("GROMACS and PLUMED", { exact: false }).first(),
+  ).toBeVisible();
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
 });
 
@@ -294,12 +312,13 @@ test("projects index links to public case studies with research-document section
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
 });
 
-test("each public project route renders required headings and year-only dates", async ({
+test("each public project route renders required headings and dates", async ({
   page,
 }) => {
-  for (const [path, year] of [
-    ["/projects/nitrate-reduction-electrolytes", "2024"],
-    ["/projects/smoothened-gi", "2023"],
+  for (const [path, datetime, label] of [
+    ["/projects/rotskoff-protein-representations", "2026-06", "June 2026"],
+    ["/projects/nitrate-reduction-electrolytes", "2024-12", "December 2024"],
+    ["/projects/smoothened-gi", "2023-12", "December 2023"],
   ]) {
     await page.goto(path);
     for (const heading of [
@@ -311,12 +330,14 @@ test("each public project route renders required headings and year-only dates", 
     ]) {
       await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     }
-    await expect(page.locator(`time[datetime='${year}']`)).toBeVisible();
+    await expect(page.locator(`time[datetime='${datetime}']`)).toHaveText(
+      label,
+    );
     await expect(page.locator("time[datetime='2024-01-01']")).toHaveCount(0);
   }
 });
 
-test("papers page preserves publication authors, status, and year-only date precision", async ({
+test("papers page preserves publication authors, status, and date precision", async ({
   page,
 }) => {
   await page.goto("/papers");
@@ -325,7 +346,7 @@ test("papers page preserves publication authors, status, and year-only date prec
     page.getByRole("heading", { level: 1, name: "Papers" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { level: 2, name: "2025" }),
+    page.getByRole("heading", { level: 2, name: "2026" }),
   ).toBeVisible();
   await expect(
     page.getByText(
@@ -333,13 +354,18 @@ test("papers page preserves publication authors, status, and year-only date prec
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(page.getByText("Published", { exact: true })).toBeVisible();
   await expect(
-    page.getByText("Ryan Yu, Amy-Doan Vo, Soo-Kyung Kim, William Goddard III", {
-      exact: true,
-    }),
+    page.getByText(
+      "Ryan D. Yu, Amy-Doan P. Vo, Soo-Kyung Kim, William A. Goddard III",
+      { exact: true },
+    ),
   ).toBeVisible();
-  await expect(page.locator("time[datetime='2025']")).toHaveText("2025");
+  await expect(page.getByRole("link", { name: /DOI/i })).toHaveAttribute(
+    "href",
+    "https://doi.org/10.1073/pnas.2604658123",
+  );
+  await expect(page.locator("time[datetime='2026']")).toHaveText("2026");
   await expect(page.locator("time[datetime='2025-01-01']")).toHaveCount(0);
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
   await expect(page.getByRole("combobox")).toHaveCount(0);
@@ -347,7 +373,7 @@ test("papers page preserves publication authors, status, and year-only date prec
   await expect(publicationTypes).toHaveCount(1);
   await expect(publicationTypes.first()).toHaveAttribute(
     "data-publication-type",
-    "manuscript",
+    "journal",
   );
 });
 
@@ -360,11 +386,13 @@ test("about page presents the approved research trajectory without vanity conten
     page.getByRole("heading", { level: 1, name: "About Ryan Yu" }),
   ).toBeVisible();
   await expect(page.getByText("2023 to 2027", { exact: false })).toBeVisible();
+  for (const appointment of ["Rotskoff Lab", "Fong Lab", "Goddard Lab"]) {
+    await expect(
+      page.getByRole("main").getByText(appointment, { exact: true }),
+    ).toBeVisible();
+  }
   await expect(
-    page.getByRole("main").getByText("Goddard Lab", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("main").getByText("Fong Lab", { exact: true }),
+    page.getByText("June 2026–present", { exact: true }),
   ).toBeVisible();
   await expect(
     page.getByText(/skill cloud|publications count|citation count/i),

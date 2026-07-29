@@ -7,12 +7,20 @@ import { takeFeatured } from "../lib/content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const projects = takeFeatured(await getCollection("projects"), 3);
-const nitrateProject = projects.find(
-  (project) => project.id === "nitrate-reduction-electrolytes",
+const orderedTracks = [
+  "rotskoff-protein-representations",
+  "nitrate-reduction-electrolytes",
+  "smoothened-gi",
+].flatMap((id) => {
+  const project = projects.find((entry) => entry.id === id);
+  return project ? [project] : [];
+});
+const renderedTracks = await Promise.all(
+  orderedTracks.map(async (project) => ({
+    project,
+    Content: (await render(project)).Content,
+  })),
 );
-const smoothenedProject = projects.find((project) => project.id === "smoothened-gi");
-const NitrateContent = nitrateProject && (await render(nitrateProject)).Content;
-const SmoothenedContent = smoothenedProject && (await render(smoothenedProject)).Content;
 ---
 
 <BaseLayout
@@ -24,8 +32,8 @@ const SmoothenedContent = smoothenedProject && (await render(smoothenedProject))
       <h1>From first-principles data to physical insight</h1>
       <div>
         <p class="research-lede">
-          I study electrochemical and biomolecular questions with AI/ML potentials,
-          molecular dynamics, and metadynamics.
+          I study interpretable protein representations, electrochemical interfaces,
+          and biomolecular mechanisms with machine learning and molecular simulation.
         </p>
         <p>
           The common thread is a scientific workflow that connects the quality of
@@ -54,58 +62,37 @@ const SmoothenedContent = smoothenedProject && (await render(smoothenedProject))
 
   <div class="research-tracks">
     {
-      nitrateProject && (
+      renderedTracks.map(({ project, Content }, index) => (
         <section
-          class="research-track"
-          id="nitrate-reduction-electrolytes"
-          aria-labelledby="nitrate-title"
+          class:list={[
+            "research-track",
+            { "research-track--alternate": index % 2 === 1 },
+          ]}
+          id={project.id}
+          aria-labelledby={`${project.id}-title`}
         >
           <div class="container research-track__grid">
             <div class="track-heading">
-              <p>{nitrateProject.data.status}</p>
-              <h2 id="nitrate-title">{nitrateProject.data.title}</h2>
+              <p>{project.data.status}</p>
+              <h2 id={`${project.id}-title`}>{project.data.title}</h2>
             </div>
             <div class="track-copy">
-              <p>{nitrateProject.data.summary}</p>
-              {NitrateContent && <NitrateContent />}
-              <ul aria-label="Nitrate-reduction research themes">
-                {nitrateProject.data.themes.map((theme) => <li>{theme}</li>)}
+              <p>{project.data.summary}</p>
+              <Content />
+              <ul aria-label={`${project.data.title} research themes`}>
+                {project.data.themes.map((theme) => <li>{theme}</li>)}
               </ul>
             </div>
           </div>
         </section>
-      )
-    }
-
-    {
-      smoothenedProject && (
-        <section
-          class="research-track research-track--alternate"
-          id="smoothened-gi"
-          aria-labelledby="smoothened-title"
-        >
-          <div class="container research-track__grid">
-            <div class="track-heading">
-              <p>{smoothenedProject.data.status}</p>
-              <h2 id="smoothened-title">{smoothenedProject.data.title}</h2>
-            </div>
-            <div class="track-copy">
-              <p>{smoothenedProject.data.summary}</p>
-              {SmoothenedContent && <SmoothenedContent />}
-              <ul aria-label="Smoothened research themes">
-                {smoothenedProject.data.themes.map((theme) => <li>{theme}</li>)}
-              </ul>
-            </div>
-          </div>
-        </section>
-      )
+      ))
     }
   </div>
 </BaseLayout>
 
 <style>
   .research-hero {
-    padding-block: var(--space-xl);
+    padding-block: var(--space-l);
     border-block-end: 1px solid var(--border);
     background: var(--surface);
   }
@@ -126,7 +113,10 @@ const SmoothenedContent = smoothenedProject && (await render(smoothenedProject))
   }
 
   .research-lede + p { color: var(--ink-muted); }
-  .flow-section, .research-track { padding-block: var(--space-xl); }
+  .flow-section,
+  .research-track {
+    padding-block: var(--space-l);
+  }
   .flow-section { border-block-end: 1px solid var(--border); }
   .validation-note { max-width: var(--prose-width); margin-block-start: var(--space-l); color: var(--ink-muted); }
 
@@ -140,6 +130,10 @@ const SmoothenedContent = smoothenedProject && (await render(smoothenedProject))
 
   .section-heading p,
   .track-copy p + p { color: var(--ink-muted); }
+
+  .section-heading h2 {
+    font-size: var(--step-2);
+  }
 
   .research-track { scroll-margin-block-start: var(--space-m); }
 
@@ -161,7 +155,9 @@ const SmoothenedContent = smoothenedProject && (await render(smoothenedProject))
     font-weight: 740;
   }
 
-  .track-heading h2 { font-size: var(--step-2); }
+  .track-heading h2 {
+    font-size: var(--step-2);
+  }
 
   .track-copy {
     max-width: var(--prose-width);

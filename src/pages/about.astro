@@ -25,31 +25,51 @@ const personJsonLd = buildPersonJsonLd(
 
       <h2>Methods and questions</h2>
       <p>
-        Ryan’s work combines first-principles data, machine-learning potentials,
-        molecular dynamics, and metadynamics to connect molecular-scale behavior
-        with physical insight. Current questions span electrochemical interfaces,
-        nitrate-reduction electrolytes, TiH2/electrolyte interfaces, and
-        biomolecular activation mechanisms.
+        Ryan’s work combines interpretable learned representations, first-principles
+        calculations, machine-learned interatomic potentials, molecular dynamics, and
+        metadynamics. Current questions span protein conformational distributions,
+        electrochemical nitrate-reduction interfaces, and GPCR activation mechanisms.
       </p>
 
       <h2>Research appointments</h2>
       <dl>
-        <div><dt>Goddard Lab</dt><dd>2023–present</dd></div>
-        <div><dt>Fong Lab</dt><dd>2024–present</dd></div>
-        <div><dt>VOC/LSER project</dt><dd>2025</dd></div>
+        <div>
+          <dt><span>Rotskoff Lab</span> · Stanford University</dt>
+          <dd>June 2026–present</dd>
+        </div>
+        <div>
+          <dt><span>Fong Lab</span> · Caltech</dt>
+          <dd>December 2024–present</dd>
+        </div>
+        <div>
+          <dt><span>Goddard Lab</span> · Caltech</dt>
+          <dd>December 2023–present</dd>
+        </div>
       </dl>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .page-header, .page-content { padding-block: var(--space-xl); }
+  .page-header, .page-content { padding-block: var(--space-l); }
   .page-header { border-block-end: 1px solid var(--border); background: var(--surface); }
   .eyebrow { color: var(--primary-strong); font-size: var(--step--1); font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; }
-  h2 { margin-block: var(--space-l) var(--space-s); }
+  h2 { margin-block: var(--space-l) var(--space-s); font-size: var(--step-2); }
   h2:first-child { margin-block-start: 0; }
   dl { margin: var(--space-m) 0 0; border-block-start: 1px solid var(--border); }
-  dl div { display: flex; justify-content: space-between; gap: var(--space-m); padding-block: var(--space-s); border-block-end: 1px solid var(--border); }
+  dl div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-xs) var(--space-m);
+    padding-block: var(--space-s);
+    border-block-end: 1px solid var(--border);
+  }
   dt { font-weight: 720; }
   dd { margin: 0; color: var(--ink-muted); }
+
+  @media (max-width: 40rem) {
+    dl div {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
