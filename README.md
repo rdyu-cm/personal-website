@@ -1,9 +1,9 @@
 # Ryan Yu research website
 
-Static Astro site for Ryan Yu's research profile. The current public canonical
-URL is `https://site.rdyu-cm.workers.dev`.
+Static Astro research portfolio deployed as Cloudflare Workers Static Assets.
+The canonical public URL is `https://site.rdyu-cm.workers.dev`.
 
-## Setup and scripts
+## Local development
 
 Use Node.js 22.12 or newer and npm. Install the exact locked dependency graph:
 
@@ -11,10 +11,11 @@ Use Node.js 22.12 or newer and npm. Install the exact locked dependency graph:
 npm ci
 ```
 
-Use these commands during development and before release:
+Common commands:
 
 ```bash
 npm run dev
+npm run social-preview
 npm run format
 npm run format:check
 npm run check
@@ -24,87 +25,79 @@ npm run build
 npm run preview -- --host 127.0.0.1
 ```
 
-`npm run build` runs Astro type/content validation before generating `dist/`.
-The Playwright command exercises both configured desktop and mobile projects;
-setting `CI=1` makes it start a fresh local server.
+`npm run social-preview` deterministically regenerates
+`public/social-preview.png` through the existing Playwright toolchain.
+`npm run build` validates Astro types and content before producing the static
+`dist/` directory.
 
-## Content authoring
+## Updating public content
 
-Projects are Markdown files in `src/content/projects/`; publications are in
-`src/content/publications/`. Their required frontmatter is typed in
-`src/content.config.ts`. Copy an existing entry and supply every required
-field, including a `date` plus its matching `datePrecision` (`year`, `month`,
-or `day`), `themes`, `featured`, and `draft`.
+Shared identity and contact links live in `src/data/profile.ts`. Projects are
+Markdown files in `src/content/projects/`; publications are in
+`src/content/publications/`. Their frontmatter is typed in
+`src/content.config.ts`.
 
-Set `draft: true` to keep an entry out of all public lists and routes. Change
-it to `false` only when it is ready to publish. Publication `type` must be one
-of `journal`, `conference`, `preprint`, or `manuscript`; optional links are
-validated URLs. A project that has `heroImage` must also provide meaningful
-`heroAlt` text.
+Copy an existing record and provide every required field, including `date`,
+`datePrecision` (`year`, `month`, or `day`), `themes`, `featured`, and `draft`.
+Set `draft: true` until an entry is ready to appear in public lists and routes.
+Publication `type` must be `journal`, `conference`, `preprint`, or `manuscript`.
 
-Only add images that are intended to be public. Put public static images in
-`public/images/` and reference them with a base-safe path (for example,
-`/images/example.png`). For each rendered image, record meaningful alt text and
-its intrinsic dimensions in the relevant content entry before using `Figure`.
-Before committing, review the image, filename, alt text, frontmatter, and
-surrounding copy for private, unpublished, identifying, or otherwise sensitive
-information. Do not put private source images, unpublished figures, or personal
-documents in `public/`, `src/content/`, or any referenced asset path: everything
-copied to `dist/` is publicly deployable.
+Public static assets belong in `public/`. A project using `heroImage` must also
+provide meaningful `heroAlt` text. Run the complete verification suite before
+publishing new copy, links, or images.
 
-The site deliberately serves an HTML CV from `src/pages/cv.astro`, not a
-downloadable resume. Update that source directly, preview the rendered `/cv`
-route, and run the verification suite before publishing. Keep
-`Yu_Ryan_Resume.pdf` only at repository root: it is ignored by Git and must
-remain untracked. Never move, link, or copy it into `public/` or `dist/`.
-Do not add a phone number to the CV or other public content.
+## Privacy and publication boundary
 
-## Canonical URL and deployment base
+Everything copied to `dist/` and every tracked repository file should be
+treated as public.
 
-`SITE_URL` controls Astro's `site` and derived deployment `base`. The default
-`https://site.rdyu-cm.workers.dev` is a root deployment, so generated assets and
-routes have no path prefix. Canonical URLs, sitemap, robots sitemap URL, and
-homepage Person JSON-LD use that public URL.
+Do not add private source images, unpublished figures, research data, model
+outputs, trajectories, personal documents, credentials, a phone number, or
+other sensitive information to `public/`, `src/`, documentation, tests, or
+referenced asset paths.
 
-For a future root-domain deployment, set `SITE_URL` to the final HTTPS origin
-without a path, for example:
+`Yu_Ryan_Resume.pdf` may remain only at the repository root. It is ignored by
+Git and must stay untracked; never move, link, or copy it into `public/` or
+`dist/`. The public site intentionally has no CV route or résumé download.
+
+## Cloudflare deployment
+
+Worker `rdyu-site` is connected to `rdyu-cm/personal-website`. Pushes to `main`
+automatically build and deploy through Cloudflare Workers Builds.
+
+| Setting                       | Value                                                |
+| ----------------------------- | ---------------------------------------------------- |
+| Production branch             | `main`                                               |
+| Build command                 | `npm run build`                                      |
+| Deploy command                | `npx wrangler@latest deploy`                         |
+| Non-production deploy command | `npx wrangler@latest versions upload`                |
+| Root directory                | `/`                                                  |
+| Node.js version               | 22.12 or newer                                       |
+| Environment variable          | `SITE_URL=https://site.rdyu-cm.workers.dev`          |
+| Preview behavior              | Preview builds for feature branches or pull requests |
+
+`wrangler.jsonc` serves the generated `dist` directory through Workers Static
+Assets. The project uses static Astro output: it has no Worker entry point,
+Astro server adapter, or runtime compute.
+
+Cloudflare credentials, GitHub access, domains, and DNS remain external to this
+repository. Do not commit credentials or tokens.
+
+## Custom-domain handoff
+
+`SITE_URL` controls Astro’s canonical `site` and deployment base. For a future
+root-domain deployment, use the final HTTPS origin without a path:
 
 ```bash
 SITE_URL=https://research.example.com npm run build
 ```
 
-This produces no Astro base path. Use the identical value in Cloudflare Workers
-Builds and CI when the custom domain is chosen; do not change DNS as part of
-this repository workflow.
-
-## Cloudflare Workers handoff
-
-The site deploys as native Workers Static Assets; it does not use Astro SSR or
-the `@astrojs/cloudflare` adapter. Connect Git repository
-`rdyu-cm/personal-website` to Worker `rdyu-site` with:
-
-| Setting                       | Value                                             |
-| ----------------------------- | ------------------------------------------------- |
-| Production branch             | `main`                                            |
-| Build command                 | `npm run build`                                   |
-| Deploy command                | `npx wrangler@latest deploy`                      |
-| Non-production deploy command | `npx wrangler@latest versions upload`             |
-| Root directory                | `/`                                               |
-| Node.js version               | 22.12 or newer                                    |
-| Environment variable          | `SITE_URL` = the eventual public canonical URL    |
-| Preview behavior              | Enable preview builds for feature branches or PRs |
-
-`wrangler.jsonc` points Workers at the generated `dist` directory and contains
-no `main` entry point, so no Worker runtime code or Astro server adapter is
-needed. Pushes to `main` automatically build and deploy through Workers Builds.
-
-Do not connect a custom domain or alter DNS during initial setup. Cloudflare
-credentials and the GitHub integration are external prerequisites; this
-repository does not contain them.
+Set the identical value in Cloudflare Workers Builds when connecting the custom
+domain. DNS and domain configuration are intentionally outside this repository.
 
 ## Release verification
 
-Run a clean install and the complete release suite:
+Run:
 
 ```bash
 npm ci
@@ -113,12 +106,16 @@ npm run check
 npm run test:unit
 CI=1 npm run test:e2e
 npm run build
-SITE_URL=https://research.example.com npm run build
+npx wrangler deploy --dry-run
 ```
 
-Inspect both builds for `sitemap-index.xml`, `robots.txt`, `404.html`, correct
-canonical URLs and JSON-LD, and ensure no resume PDF or phone number appears in
-`dist/`. Check rendered local and external links in a preview. This project has
-no locally installed Lighthouse runner; use Lighthouse manually against Home,
-Research, one public project, and Papers when the deployment preview is
-available.
+Inspect the production output for:
+
+- `sitemap-index.xml`, `robots.txt`, and `404.html`.
+- Correct canonical URLs and structured data.
+- Absolute Open Graph and Twitter image URLs.
+- Root-relative static assets.
+- No `/cv` page, résumé PDF, phone number, credentials, or private material.
+
+After an approved push to `main`, smoke-test Home, Research, one project,
+Papers, and the branded not-found page on the live Worker URL.
