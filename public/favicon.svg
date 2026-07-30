@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Ryan Yu molecular mark">
-  <rect width="32" height="32" rx="6" fill="#11121c"/>
-  <path d="M9 9.5 16 16l7-6.5M16 16l7 6.5M16 16l-7 6.5" fill="none" stroke="#8178e8" stroke-width="2"/>
-  <circle cx="9" cy="9.5" r="2.5" fill="#f0effa"/>
-  <circle cx="23" cy="9.5" r="2.5" fill="#67d8d0"/>
-  <circle cx="16" cy="16" r="2.75" fill="#f0effa"/>
-  <circle cx="9" cy="22.5" r="2.5" fill="#67d8d0"/>
-  <circle cx="23" cy="22.5" r="2.5" fill="#f0effa"/>
+  <rect width="32" height="32" rx="6" fill="#251f37"/>
+  <path d="M9 9.5 16 16l7-6.5M16 16l7 6.5M16 16l-7 6.5" fill="none" stroke="#e8b6d5" stroke-width="2"/>
+  <circle cx="9" cy="9.5" r="2.5" fill="#e4deec"/>
+  <circle cx="23" cy="9.5" r="2.5" fill="#a9dcdd"/>
+  <circle cx="16" cy="16" r="2.75" fill="#e8b6d5"/>
+  <circle cx="9" cy="22.5" r="2.5" fill="#a9dcdd"/>
+  <circle cx="23" cy="22.5" r="2.5" fill="#e4deec"/>
 </svg>

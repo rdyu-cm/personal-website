@@ -28,6 +28,33 @@ describe("public repository operations", () => {
     expect(readme).not.toContain("GitHub Pages");
   });
 
+  test("documents the four editable research-profile content sources", () => {
+    const readme = read("README.md");
+
+    for (const source of [
+      "src/data/profile.ts",
+      "src/content/research/",
+      "src/content/publications/",
+      "src/content/about/about.md",
+    ]) {
+      expect(readme).toContain(source);
+    }
+    expect(readme).not.toContain("src/content/projects/");
+    expect(readme).not.toMatch(/\bone project\b|\bPapers\b/);
+  });
+
+  test("uses the twilight palette in generated brand assets", () => {
+    const favicon = read("public/favicon.svg");
+    const renderer = read("scripts/render-social-preview.mjs");
+
+    for (const source of [favicon, renderer]) {
+      expect(source).toContain("#251f37");
+      expect(source).toContain("#e8b6d5");
+      expect(source).toContain("#a9dcdd");
+      expect(source).not.toMatch(/#11121c|#8178e8|#67d8d0/);
+    }
+  });
+
   test("keeps the resume private", () => {
     expect(
       execFileSync("git", ["check-ignore", "-v", "Yu_Ryan_Resume.pdf"], {
@@ -56,5 +83,25 @@ describe("public repository operations", () => {
           path.startsWith("docs/superpowers/"),
       ),
     ).toEqual([]);
+  });
+
+  test("does not ship obsolete site labels, project schema, or project content", () => {
+    const tracked = execFileSync("git", ["ls-files"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    const schema = read("src/content.config.ts");
+
+    expect(tracked).not.toContain("src/content/projects/");
+    expect(schema).not.toContain('base: "./src/content/projects"');
+    expect(schema).not.toMatch(/\bprojects\b/);
+    for (const file of [
+      "src/pages/index.astro",
+      "src/components/Header.astro",
+      "src/pages/publications.astro",
+      "src/pages/404.astro",
+    ]) {
+      expect(read(file)).not.toMatch(/Research outputs|>Papers<|>Projects</i);
+    }
   });
 });

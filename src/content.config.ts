@@ -11,34 +11,6 @@ const externalLinksSchema = z.object({
   project: z.url().optional(),
 });
 
-const projects = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/projects" }),
-  schema: z
-    .object({
-      title: z.string(),
-      summary: z.string(),
-      date: z.coerce.date(),
-      datePrecision: z.enum(["year", "month", "day"]),
-      status: z.string(),
-      themes: z.array(z.string()).min(1),
-      role: z.string(),
-      featured: z.boolean(),
-      draft: z.boolean(),
-      collaborators: z.array(z.string()).optional(),
-      heroImage: z.string().optional(),
-      heroAlt: z.string().trim().min(1).optional(),
-      resultSummary: z.string().trim().min(1).optional(),
-      links: externalLinksSchema.optional(),
-    })
-    .refine(
-      (project) => !project.heroImage || Boolean(project.heroAlt?.trim()),
-      {
-        message: "heroAlt is required when heroImage is provided",
-        path: ["heroAlt"],
-      },
-    ),
-});
-
 const publications = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/publications" }),
   schema: z.object({
@@ -80,4 +52,4 @@ const about = defineCollection({
   schema: z.object({ title: z.string().trim().min(1) }),
 });
 
-export const collections = { projects, research, publications, about };
+export const collections = { research, publications, about };

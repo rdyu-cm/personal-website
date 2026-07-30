@@ -172,7 +172,6 @@ describe("content schemas", () => {
       'type: z.enum(["journal", "conference", "preprint", "manuscript", "poster", "talk", "presentation"])',
     );
     expect(schema).toContain("const about = defineCollection");
-    expect(schema).toMatch(/export const collections = \{[^}]*projects/);
     expect(schema).toMatch(/export const collections = \{[^}]*research/);
     expect(schema).toMatch(/export const collections = \{[^}]*publications/);
     expect(schema).toMatch(/export const collections = \{[^}]*about/);
@@ -194,11 +193,11 @@ describe("content schemas", () => {
 
     expect(
       schema.match(/datePrecision: z\.enum\(\["year", "month", "day"\]\)/g),
-    ).toHaveLength(3);
+    ).toHaveLength(2);
     for (const record of [
-      "src/content/projects/rotskoff-protein-representations.md",
-      "src/content/projects/smoothened-gi.md",
-      "src/content/projects/nitrate-reduction-electrolytes.md",
+      "src/content/research/rotskoff-protein-representations.md",
+      "src/content/research/smoothened-gi.md",
+      "src/content/research/nitrate-reduction-electrolytes.md",
     ]) {
       expect(readSource(record)).toContain("datePrecision: month");
     }
@@ -210,12 +209,6 @@ describe("content schemas", () => {
   test("uses lowercase publication type enums including presentation records", () => {
     expect(readSource("src/content.config.ts")).toContain(
       'type: z.enum(["journal", "conference", "preprint", "manuscript", "poster", "talk", "presentation"])',
-    );
-  });
-
-  test("trims and requires hero alt text when a hero image is supplied", () => {
-    expect(readSource("src/content.config.ts")).toContain(
-      "project.heroAlt?.trim()",
     );
   });
 });
@@ -240,11 +233,11 @@ describe("resume privacy ignore", () => {
 });
 
 describe("current public research record", () => {
-  test("publishes the three current research projects in newest-first order", () => {
+  test("publishes the three current research appointments in newest-first order", () => {
     const records = [
-      "src/content/projects/rotskoff-protein-representations.md",
-      "src/content/projects/nitrate-reduction-electrolytes.md",
-      "src/content/projects/smoothened-gi.md",
+      "src/content/research/rotskoff-protein-representations.md",
+      "src/content/research/nitrate-reduction-electrolytes.md",
+      "src/content/research/smoothened-gi.md",
     ].map(readSource);
 
     expect(records[0]).toContain("date: 2026-06-01");

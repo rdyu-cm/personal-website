@@ -32,19 +32,23 @@ npm run preview -- --host 127.0.0.1
 
 ## Updating public content
 
-Shared identity and contact links live in `src/data/profile.ts`. Projects are
-Markdown files in `src/content/projects/`; publications are in
-`src/content/publications/`. Their frontmatter is typed in
-`src/content.config.ts`.
+Routine updates belong in four content sources:
 
-Copy an existing record and provide every required field, including `date`,
-`datePrecision` (`year`, `month`, or `day`), `themes`, `featured`, and `draft`.
-Set `draft: true` until an entry is ready to appear in public lists and routes.
-Publication `type` must be `journal`, `conference`, `preprint`, or `manuscript`.
+- `src/data/profile.ts` contains shared identity, affiliation, and contact links.
+- `src/content/research/` contains one Markdown record per research appointment.
+- `src/content/publications/` contains publications and presentations.
+- `src/content/about/about.md` contains the manually authored About page.
 
-Public static assets belong in `public/`. A project using `heroImage` must also
-provide meaningful `heroAlt` text. Run the complete verification suite before
-publishing new copy, links, or images.
+The Markdown frontmatter is typed in `src/content.config.ts`. Copy an existing
+record and provide every required field. Research records require `date`,
+`datePrecision` (`year`, `month`, or `day`), `status`, `summary`, `methods`,
+`featured`, and `draft`. Publication records also require `authors`, `type`,
+`themes`, and their other existing fields; `type` may be `journal`,
+`conference`, `preprint`, `manuscript`, `poster`, `talk`, or `presentation`.
+Set `draft: true` until any record is ready to appear publicly.
+
+Public static assets belong in `public/`. Run the complete verification suite
+before publishing new copy, links, or images.
 
 ## Privacy and publication boundary
 
@@ -117,5 +121,5 @@ Inspect the production output for:
 - Root-relative static assets.
 - No `/cv` page, résumé PDF, phone number, credentials, or private material.
 
-After an approved push to `main`, smoke-test Home, Research, one project,
-Papers, and the branded not-found page on the live Worker URL.
+After an approved push to `main`, smoke-test Home, Research, Publications &
+Presentations, About, and the branded not-found page on the live Worker URL.

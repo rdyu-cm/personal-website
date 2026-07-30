@@ -27,25 +27,25 @@ try {
             align-items: center;
             gap: 72px;
             padding: 78px 88px;
-            color: #f0effa;
+            color: #e4deec;
             background:
-              radial-gradient(circle at 18% 0%, rgb(129 120 232 / 22%), transparent 390px),
-              radial-gradient(circle at 90% 78%, rgb(103 216 208 / 12%), transparent 360px),
-              #11121c;
+              radial-gradient(circle at 18% 0%, rgb(232 182 213 / 20%), transparent 390px),
+              radial-gradient(circle at 90% 78%, rgb(169 220 221 / 12%), transparent 360px),
+              #251f37;
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           }
           body::before {
             content: "";
             position: absolute;
             inset: 32px;
-            border: 1px solid rgb(129 120 232 / 28%);
+            border: 1px solid rgb(232 182 213 / 28%);
             border-radius: 18px;
             pointer-events: none;
           }
           .copy { position: relative; z-index: 1; }
           .tags {
             margin: 0 0 30px;
-            color: #67d8d0;
+            color: #a9dcdd;
             font-size: 21px;
             font-weight: 700;
             letter-spacing: 0.045em;
@@ -60,7 +60,7 @@ try {
           .thesis {
             max-width: 680px;
             margin: 30px 0 0;
-            color: #c5c3d7;
+            color: #c9c0d8;
             font-size: 31px;
             font-weight: 520;
             line-height: 1.35;
@@ -77,7 +77,7 @@ try {
             top: 50%;
             width: 138px;
             height: 2px;
-            background: linear-gradient(90deg, #8178e8, #67d8d0);
+            background: linear-gradient(90deg, #e8b6d5, #a9dcdd);
             transform-origin: 0 50%;
             opacity: 0.78;
           }
@@ -89,23 +89,23 @@ try {
             position: absolute;
             width: 34px;
             height: 34px;
-            border: 4px solid #11121c;
+            border: 4px solid #251f37;
             border-radius: 50%;
-            background: #f0effa;
-            box-shadow: 0 0 0 2px rgb(129 120 232 / 65%);
+            background: #e4deec;
+            box-shadow: 0 0 0 2px rgb(232 182 213 / 65%);
           }
           .node--center {
             left: calc(50% - 24px);
             top: calc(50% - 24px);
             width: 48px;
             height: 48px;
-            background: #8178e8;
-            box-shadow: 0 0 0 2px rgb(240 239 250 / 80%), 0 0 50px rgb(129 120 232 / 28%);
+            background: #e8b6d5;
+            box-shadow: 0 0 0 2px rgb(228 222 236 / 80%), 0 0 50px rgb(232 182 213 / 28%);
           }
           .node--a { left: 44px; top: 42px; }
-          .node--b { right: 42px; top: 48px; background: #67d8d0; }
+          .node--b { right: 42px; top: 48px; background: #a9dcdd; }
           .node--c { right: 36px; bottom: 44px; }
-          .node--d { left: 48px; bottom: 38px; background: #67d8d0; }
+          .node--d { left: 48px; bottom: 38px; background: #a9dcdd; }
         </style>
       </head>
       <body>
