@@ -1,6 +1,7 @@
 export interface Profile {
   name: string;
   headline: string;
+  homepageSummary: string;
   affiliation?: string;
   shortBio: string;
   longBio: string[];
@@ -15,6 +16,8 @@ export function defineProfile(value: Profile): Profile {
 export const profile = defineProfile({
   name: "Ryan Yu",
   headline: "Chemical Engineering Undergraduate · AI for Science",
+  homepageSummary:
+    "Interpretable protein representations, machine-learned potentials, and molecular mechanisms.",
   affiliation: "California Institute of Technology",
   shortBio:
     "Caltech Chemical Engineering (Computational) undergraduate working across interpretable protein representations, machine-learned interatomic potentials, and molecular simulation.",

@@ -163,12 +163,38 @@ describe("content selectors", () => {
 });
 
 describe("content schemas", () => {
+  test("defines research, publication, and singleton about collections", () => {
+    const schema = readSource("src/content.config.ts");
+
+    expect(schema).toContain("const research = defineCollection");
+    expect(schema).toContain('base: "./src/content/research"');
+    expect(schema).toContain(
+      'type: z.enum(["journal", "conference", "preprint", "manuscript", "poster", "talk", "presentation"])',
+    );
+    expect(schema).toContain("const about = defineCollection");
+    expect(schema).toMatch(/export const collections = \{[^}]*projects/);
+    expect(schema).toMatch(/export const collections = \{[^}]*research/);
+    expect(schema).toMatch(/export const collections = \{[^}]*publications/);
+    expect(schema).toMatch(/export const collections = \{[^}]*about/);
+  });
+
+  test("keeps editable descriptions out of page templates", () => {
+    expect(readSource("src/content/about/about.md")).toContain("Ryan Yu");
+    for (const id of [
+      "rotskoff-protein-representations",
+      "nitrate-reduction-electrolytes",
+      "smoothened-gi",
+    ]) {
+      expect(readSource(`src/content/research/${id}.md`)).toContain("summary:");
+    }
+  });
+
   test("requires explicit date precision in both collection schemas and records", () => {
     const schema = readSource("src/content.config.ts");
 
     expect(
       schema.match(/datePrecision: z\.enum\(\["year", "month", "day"\]\)/g),
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     for (const record of [
       "src/content/projects/rotskoff-protein-representations.md",
       "src/content/projects/smoothened-gi.md",
@@ -181,9 +207,9 @@ describe("content schemas", () => {
     ).toContain("datePrecision: year");
   });
 
-  test("uses lowercase publication type enums", () => {
+  test("uses lowercase publication type enums including presentation records", () => {
     expect(readSource("src/content.config.ts")).toContain(
-      'type: z.enum(["journal", "conference", "preprint", "manuscript"])',
+      'type: z.enum(["journal", "conference", "preprint", "manuscript", "poster", "talk", "presentation"])',
     );
   });
 

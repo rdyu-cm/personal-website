@@ -46,7 +46,8 @@ const publications = defineCollection({
     authors: z.array(z.string()).min(1),
     date: z.coerce.date(),
     datePrecision: z.enum(["year", "month", "day"]),
-    type: z.enum(["journal", "conference", "preprint", "manuscript"]),
+    // prettier-ignore
+    type: z.enum(["journal", "conference", "preprint", "manuscript", "poster", "talk", "presentation"]),
     status: z.string(),
     themes: z.array(z.string()).min(1),
     featured: z.boolean(),
@@ -57,4 +58,26 @@ const publications = defineCollection({
   }),
 });
 
-export const collections = { projects, publications };
+const research = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/research" }),
+  schema: z.object({
+    title: z.string().trim().min(1),
+    lab: z.string().trim().min(1),
+    institution: z.string().trim().min(1),
+    date: z.coerce.date(),
+    datePrecision: z.enum(["year", "month", "day"]),
+    status: z.string().trim().min(1),
+    summary: z.string().trim().min(1),
+    methods: z.array(z.string().trim().min(1)).min(1),
+    featured: z.boolean(),
+    draft: z.boolean(),
+    links: externalLinksSchema.optional(),
+  }),
+});
+
+const about = defineCollection({
+  loader: glob({ pattern: "about.md", base: "./src/content/about" }),
+  schema: z.object({ title: z.string().trim().min(1) }),
+});
+
+export const collections = { projects, research, publications, about };
