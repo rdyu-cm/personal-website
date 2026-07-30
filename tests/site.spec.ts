@@ -91,7 +91,7 @@ test("shared SEO exposes the Deep Orbit social preview", async ({ page }) => {
 
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
     "content",
-    "#11121c",
+    "#251f37",
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
@@ -127,7 +127,7 @@ test("skip link is first in the focus order and moves focus to main", async ({
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("primary navigation identifies home as the current page", async ({
+test("primary navigation exposes the four-page research profile", async ({
   page,
 }) => {
   await page.goto("/");
@@ -138,20 +138,33 @@ test("primary navigation identifies home as the current page", async ({
   for (const [name, href] of [
     ["Home", "/"],
     ["Research", "/research"],
-    ["Projects", "/projects"],
-    ["Papers", "/papers"],
+    ["Publications & Presentations", "/publications"],
     ["About", "/about"],
   ]) {
     await expect(
       navigation.getByRole("link", { name, exact: true }),
     ).toHaveAttribute("href", href);
   }
-  await expect(
-    navigation.getByRole("link", { name: "CV", exact: true }),
-  ).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "Projects" })).toHaveCount(
+    0,
+  );
+  await expect(navigation.getByRole("link", { name: "Papers" })).toHaveCount(0);
   await expect(
     navigation.getByRole("link", { name: "Home", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+});
+
+test("uses softened twilight colors instead of white on black", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const colors = await page.locator("body").evaluate((body) => {
+    const style = getComputedStyle(body);
+    return { color: style.color, background: style.backgroundColor };
+  });
+  expect(colors.color).not.toBe("rgb(255, 255, 255)");
+  expect(colors.background).not.toBe("rgb(0, 0, 0)");
 });
 
 test("homepage presents the public research overview with one primary heading", async ({

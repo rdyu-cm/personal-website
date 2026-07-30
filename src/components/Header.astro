@@ -9,8 +9,10 @@ const currentPath = normalizePath(Astro.url.pathname);
 const navigation = [
   { label: "Home", href: toRoute("/") },
   { label: "Research", href: toRoute("/research") },
-  { label: "Projects", href: toRoute("/projects") },
-  { label: "Papers", href: toRoute("/papers") },
+  {
+    label: "Publications & Presentations",
+    href: toRoute("/publications"),
+  },
   { label: "About", href: toRoute("/about") },
 ];
 
@@ -20,7 +22,11 @@ const isCurrent = (href: string) =>
 
 <header class="site-header">
   <div class="container header-inner">
-    <a class="site-identity" href={toRoute("/")} aria-label={`${profile.name}, home`}>
+    <a
+      class="site-identity"
+      href={toRoute("/")}
+      aria-label={`${profile.name}, home`}
+    >
       <span class="site-name">{profile.name}</span>
       <span class="site-discipline">{profile.headline}</span>
     </a>

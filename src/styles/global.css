@@ -1,15 +1,15 @@
 :root {
   color-scheme: dark;
-  --canvas: oklch(0.12 0.025 275);
-  --surface: oklch(0.16 0.035 275);
-  --surface-strong: oklch(0.21 0.045 275);
-  --ink: oklch(0.94 0.02 275);
-  --ink-muted: oklch(0.76 0.035 275);
-  --border: oklch(0.35 0.055 275);
-  --primary: oklch(0.72 0.15 285);
-  --primary-strong: oklch(0.8 0.12 285);
-  --accent: oklch(0.79 0.12 190);
-  --focus: oklch(0.85 0.13 190);
+  --canvas: oklch(0.22 0.055 292);
+  --surface: oklch(0.27 0.06 292);
+  --surface-strong: oklch(0.33 0.07 292);
+  --ink: oklch(0.91 0.025 295);
+  --ink-muted: oklch(0.78 0.035 295);
+  --border: oklch(0.46 0.065 292);
+  --primary: oklch(0.79 0.09 335);
+  --primary-strong: oklch(0.86 0.075 335);
+  --accent: oklch(0.82 0.07 205);
+  --focus: oklch(0.88 0.09 205);
   --font-sans:
     ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono:
@@ -60,12 +60,12 @@ body {
   background:
     radial-gradient(
       circle at 12% 0%,
-      oklch(0.3 0.1 285 / 0.14),
+      oklch(0.38 0.1 292 / 0.14),
       transparent 32rem
     ),
     radial-gradient(
       circle at 88% 20%,
-      oklch(0.32 0.08 190 / 0.08),
+      oklch(0.4 0.08 205 / 0.08),
       transparent 28rem
     ),
     var(--canvas);
