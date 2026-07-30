@@ -40,12 +40,16 @@ Routine updates belong in four content sources:
 - `src/content/about/about.md` contains the manually authored About page.
 
 The Markdown frontmatter is typed in `src/content.config.ts`. Copy an existing
-record and provide every required field. Research records require `date`,
-`datePrecision` (`year`, `month`, or `day`), `status`, `summary`, `methods`,
-`featured`, and `draft`. Publication records also require `authors`, `type`,
-`themes`, and their other existing fields; `type` may be `journal`,
-`conference`, `preprint`, `manuscript`, `poster`, `talk`, or `presentation`.
-Set `draft: true` until any record is ready to appear publicly.
+record and provide every required field. Research records require `title`,
+`lab`, `institution`, `date`, `datePrecision` (`year`, `month`, or `day`),
+`status`, `summary`, `methods`, `featured`, and `draft`. Publication records
+require `title`, `authors`, `date`, `datePrecision` (`year`, `month`, or
+`day`), `type`, `status`, `themes`, `featured`, and `draft`; `type` may be
+`journal`, `conference`, `preprint`, `manuscript`, `poster`, `talk`, or
+`presentation`. Publication `venue`, `summary`, and `links` are optional; a
+`links` object may contain optional `doi`, `preprint`, `code`, `slides`,
+`bibtex`, or `project` URLs. Set `draft: true` until any record is ready to
+appear publicly.
 
 Public static assets belong in `public/`. Run the complete verification suite
 before publishing new copy, links, or images.

@@ -4,4 +4,5 @@ dist/
 .astro/
 playwright-report/
 test-results/
+output/playwright/
 /Yu_Ryan_Resume.pdf

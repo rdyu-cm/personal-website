@@ -56,7 +56,11 @@ test.describe("accessibility regression checks", () => {
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/research");
-    await expect(page.locator(".research-entry")).toHaveCount(3);
+    const researchEntries = page.locator(".research-entry");
+    await expect(researchEntries).toHaveCount(3);
+    for (let index = 0; index < (await researchEntries.count()); index += 1) {
+      await expect(researchEntries.nth(index)).toBeVisible();
+    }
   });
 });
 

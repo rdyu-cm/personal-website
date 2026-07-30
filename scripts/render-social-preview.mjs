@@ -1,19 +1,23 @@
 import { chromium } from "@playwright/test";
+import { createHash } from "node:crypto";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const outputPath = fileURLToPath(
+export const socialPreviewPath = fileURLToPath(
   new URL("../public/social-preview.png", import.meta.url),
 );
 
-const browser = await chromium.launch({ headless: true });
+export async function renderSocialPreview() {
+  const browser = await chromium.launch({ headless: true });
 
-try {
-  const page = await browser.newPage({
-    viewport: { width: 1200, height: 630 },
-    deviceScaleFactor: 1,
-  });
+  try {
+    const page = await browser.newPage({
+      viewport: { width: 1200, height: 630 },
+      deviceScaleFactor: 1,
+    });
 
-  await page.setContent(`<!doctype html>
+    await page.setContent(`<!doctype html>
     <html lang="en">
       <head>
         <meta charset="utf-8" />
@@ -124,12 +128,45 @@ try {
       </body>
     </html>`);
 
-  await page.screenshot({
-    path: outputPath,
-    type: "png",
-    fullPage: false,
-    omitBackground: false,
-  });
-} finally {
-  await browser.close();
+    return await page.screenshot({
+      type: "png",
+      fullPage: false,
+      omitBackground: false,
+    });
+  } finally {
+    await browser.close();
+  }
+}
+
+function hash(buffer) {
+  return createHash("sha256").update(buffer).digest("hex");
+}
+
+export async function assertSocialPreviewCurrent() {
+  const [rendered, committed] = await Promise.all([
+    renderSocialPreview(),
+    readFile(socialPreviewPath),
+  ]);
+
+  if (!rendered.equals(committed)) {
+    throw new Error(
+      `public/social-preview.png is stale (rendered ${hash(rendered)}, committed ${hash(committed)}). Run npm run social-preview.`,
+    );
+  }
+}
+
+async function main() {
+  if (process.argv.includes("--check")) {
+    await assertSocialPreviewCurrent();
+    return;
+  }
+
+  await writeFile(socialPreviewPath, await renderSocialPreview());
+}
+
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1])
+) {
+  await main();
 }

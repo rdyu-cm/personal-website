@@ -43,6 +43,56 @@ describe("public repository operations", () => {
     expect(readme).not.toMatch(/\bone project\b|\bPapers\b/);
   });
 
+  test("documents every required research and publication frontmatter field", () => {
+    const readme = read("README.md");
+    const researchRequirements =
+      readme.match(
+        /Research records require([\s\S]*?)\. Publication records/,
+      )?.[1] ?? "";
+    const publicationRequirements =
+      readme.match(
+        /Publication records\s+require([\s\S]*?)\. Publication `venue`/,
+      )?.[1] ?? "";
+
+    for (const field of [
+      "title",
+      "lab",
+      "institution",
+      "date",
+      "datePrecision",
+      "status",
+      "summary",
+      "methods",
+      "featured",
+      "draft",
+    ]) {
+      expect(researchRequirements).toContain(`\`${field}\``);
+    }
+    for (const field of [
+      "title",
+      "authors",
+      "date",
+      "datePrecision",
+      "type",
+      "status",
+      "themes",
+      "featured",
+      "draft",
+    ]) {
+      expect(publicationRequirements).toContain(`\`${field}\``);
+    }
+  });
+
+  test("keeps the committed social preview synchronized with its renderer", () => {
+    expect(() =>
+      execFileSync("node", ["scripts/render-social-preview.mjs", "--check"], {
+        cwd: root,
+        encoding: "utf8",
+        stdio: "pipe",
+      }),
+    ).not.toThrow();
+  });
+
   test("uses the twilight palette in generated brand assets", () => {
     const favicon = read("public/favicon.svg");
     const renderer = read("scripts/render-social-preview.mjs");
