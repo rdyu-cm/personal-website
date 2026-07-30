@@ -60,17 +60,12 @@ test.describe("accessibility regression checks", () => {
     }
   });
 
-  test("research workflow remains visible with reduced motion", async ({
+  test("research appointments remain visible with reduced motion", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/research");
-    await expect(
-      page.getByRole("list", { name: "Research workflow" }),
-    ).toBeVisible();
-    await expect(
-      page.getByText("Physical insight", { exact: true }),
-    ).toBeVisible();
+    await expect(page.locator(".research-entry")).toHaveCount(3);
   });
 });
 
@@ -210,49 +205,18 @@ test("homepage presents identity, three research rows, and latest outputs", asyn
   );
 });
 
-test("research page explains the ordered data-to-insight workflow", async ({
+test("research page renders three editable appointments without workflow scaffolding", async ({
   page,
 }) => {
   await page.goto("/research");
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  const flow = page.getByRole("list", { name: "Research workflow" });
-  const stages = flow.getByRole("listitem");
-
-  await expect(stages).toHaveCount(4);
-  for (const [index, stage] of [
-    "First-principles data",
-    "Learned potentials",
-    "Molecular simulation",
-    "Physical insight",
-  ].entries()) {
-    await expect(stages.nth(index)).toContainText(stage);
+  await expect(page.locator(".research-entry")).toHaveCount(3);
+  for (const lab of ["Rotskoff Lab", "Fong Lab", "Goddard Lab"]) {
+    await expect(page.getByText(lab, { exact: true })).toBeVisible();
   }
   await expect(
-    page.getByText("molecule-similarity testing and model validation", {
-      exact: false,
-    }),
-  ).toBeVisible();
-  await expect(flow).toHaveAttribute("role", "list");
-  for (const [index, heading] of [
-    "Interpretable protein representations",
-    "Machine-learned potentials for nitrate-reduction electrolytes",
-    "Smoothened/Gi activation mechanism",
-  ].entries()) {
-    await expect(page.locator(".research-track h2").nth(index)).toHaveText(
-      heading,
-    );
-  }
-  await expect(
-    page.getByText("BioEmu and ESM3", { exact: false }).first(),
-  ).toBeVisible();
-  await expect(
-    page.getByText("LAMMPS and CP2K", { exact: false }).first(),
-  ).toBeVisible();
-  await expect(
-    page.getByText("GROMACS and PLUMED", { exact: false }).first(),
-  ).toBeVisible();
-  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+    page.getByRole("list", { name: "Research workflow" }),
+  ).toHaveCount(0);
 });
 
 test("projects index links to public case studies with research-document sections", async ({
@@ -342,25 +306,16 @@ test("papers page preserves publication authors, status, and date precision", as
   );
 });
 
-test("about page presents the approved research trajectory without vanity content", async ({
+test("about page renders only the manually authored article", async ({
   page,
 }) => {
   await page.goto("/about");
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "About Ryan Yu" }),
-  ).toBeVisible();
-  await expect(page.getByText("2023 to 2027", { exact: false })).toBeVisible();
-  for (const appointment of ["Rotskoff Lab", "Fong Lab", "Goddard Lab"]) {
-    await expect(
-      page.getByRole("main").getByText(appointment, { exact: true }),
-    ).toBeVisible();
-  }
-  await expect(
-    page.getByText("June 2026–present", { exact: true }),
+    page.getByRole("article", { name: "About Ryan Yu" }),
   ).toBeVisible();
   await expect(
-    page.getByText(/skill cloud|publications count|citation count/i),
+    page.getByText("Research appointments", { exact: true }),
   ).toHaveCount(0);
 });
 

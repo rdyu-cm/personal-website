@@ -1,93 +1,72 @@
 ---
 import { getCollection, render } from "astro:content";
 
-import ResearchFlow from "../components/ResearchFlow.astro";
 import { profile } from "../data/profile";
-import { takeFeatured } from "../lib/content";
+import { filterPublicEntries, sortByDateDescending } from "../lib/content";
+import { formatBehavioralDate } from "../lib/dates";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const projects = takeFeatured(await getCollection("projects"), 3);
-const orderedTracks = [
-  "rotskoff-protein-representations",
-  "nitrate-reduction-electrolytes",
-  "smoothened-gi",
-].flatMap((id) => {
-  const project = projects.find((entry) => entry.id === id);
-  return project ? [project] : [];
-});
-const renderedTracks = await Promise.all(
-  orderedTracks.map(async (project) => ({
-    project,
-    Content: (await render(project)).Content,
+const research = sortByDateDescending(
+  filterPublicEntries(await getCollection("research")),
+);
+const renderedResearch = await Promise.all(
+  research.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
   })),
 );
 ---
 
 <BaseLayout
   title="Research"
-  description={`The research workflow and current computational chemical engineering projects of ${profile.name}.`}
+  description={`Current computational chemical engineering research by ${profile.name}.`}
 >
   <header class="research-hero">
-    <div class="container research-hero__grid">
-      <h1>From first-principles data to physical insight</h1>
-      <div>
-        <p class="research-lede">
-          I study interpretable protein representations, electrochemical interfaces,
-          and biomolecular mechanisms with machine learning and molecular simulation.
-        </p>
-        <p>
-          The common thread is a scientific workflow that connects the quality of
-          the underlying description to the physical interpretation of a simulation.
-        </p>
-      </div>
+    <div class="container">
+      <p class="eyebrow">Research appointments</p>
+      <h1>Research</h1>
+      <p class="lede">
+        Interpretable protein representations, electrochemical interfaces, and
+        biomolecular mechanisms using machine learning and molecular simulation.
+      </p>
     </div>
   </header>
 
-  <section class="flow-section" aria-labelledby="flow-title">
+  <section class="research-section" aria-label="Research appointments">
     <div class="container">
-      <div class="section-heading">
-        <h2 id="flow-title">A data-to-insight workflow</h2>
-        <p>
-          In the nitrate-reduction work, first-principles calculations support learned
-          potentials, which extend molecular simulation toward interfacial questions.
-        </p>
+      <div class="research-list">
+        {
+          renderedResearch.map(({ entry, Content }) => {
+            const date = formatBehavioralDate(
+              entry.data.date,
+              entry.data.datePrecision,
+            );
+            return (
+              <article class="research-entry" id={entry.id}>
+                <div class="research-entry__metadata">
+                  <p>{entry.data.status}</p>
+                  <p>{entry.data.lab}</p>
+                  <p>{entry.data.institution}</p>
+                  <time datetime={date.datetime}>{date.visible}</time>
+                </div>
+                <div class="research-entry__content">
+                  <h2>{entry.data.title}</h2>
+                  <p class="research-entry__summary">{entry.data.summary}</p>
+                  <Content />
+                  <h3>Methods</h3>
+                  <ul aria-label={`${entry.data.title} methods`}>
+                    {entry.data.methods.map((method) => (
+                      <li>{method}</li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            );
+          })
+        }
       </div>
-      <ResearchFlow />
-      <p class="validation-note">
-        Validation closes the modeling loop in a separate 2025 VOC/LSER data-science
-        project, where I used molecule-similarity testing and model validation.
-      </p>
     </div>
   </section>
-
-  <div class="research-tracks">
-    {
-      renderedTracks.map(({ project, Content }, index) => (
-        <section
-          class:list={[
-            "research-track",
-            { "research-track--alternate": index % 2 === 1 },
-          ]}
-          id={project.id}
-          aria-labelledby={`${project.id}-title`}
-        >
-          <div class="container research-track__grid">
-            <div class="track-heading">
-              <p>{project.data.status}</p>
-              <h2 id={`${project.id}-title`}>{project.data.title}</h2>
-            </div>
-            <div class="track-copy">
-              <p>{project.data.summary}</p>
-              <Content />
-              <ul aria-label={`${project.data.title} research themes`}>
-                {project.data.themes.map((theme) => <li>{theme}</li>)}
-              </ul>
-            </div>
-          </div>
-        </section>
-      ))
-    }
-  </div>
 </BaseLayout>
 
 <style>
@@ -97,89 +76,90 @@ const renderedTracks = await Promise.all(
     background: var(--surface);
   }
 
-  .research-hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(19rem, 0.8fr);
-    align-items: end;
-    gap: var(--space-l) var(--space-xl);
+  .eyebrow {
+    margin-block-end: var(--space-s);
+    color: var(--primary-strong);
+    font-size: var(--step--1);
+    font-weight: 720;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .research-hero h1 { max-width: 13ch; }
-
-  .research-lede {
+  .lede {
+    max-width: var(--prose-width);
+    margin-block-start: var(--space-m);
     font-size: var(--step-1);
     font-weight: 680;
     line-height: 1.4;
   }
 
-  .research-lede + p { color: var(--ink-muted); }
-  .flow-section,
-  .research-track {
+  .research-section {
     padding-block: var(--space-l);
   }
-  .flow-section { border-block-end: 1px solid var(--border); }
-  .validation-note { max-width: var(--prose-width); margin-block-start: var(--space-l); color: var(--ink-muted); }
 
-  .section-heading {
+  .research-list {
+    border-block-start: 1px solid var(--border);
+  }
+
+  .research-entry {
     display: grid;
-    grid-template-columns: minmax(0, 0.7fr) minmax(18rem, 0.5fr);
-    align-items: end;
-    justify-content: space-between;
-    gap: var(--space-m) var(--space-xl);
-  }
-
-  .section-heading p,
-  .track-copy p + p { color: var(--ink-muted); }
-
-  .section-heading h2 {
-    font-size: var(--step-2);
-  }
-
-  .research-track { scroll-margin-block-start: var(--space-m); }
-
-  .research-track--alternate {
-    border-block: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  .research-track__grid {
-    display: grid;
-    grid-template-columns: minmax(16rem, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.25fr);
     gap: var(--space-l) var(--space-xl);
+    padding-block: var(--space-l);
+    border-block-end: 1px solid var(--border);
+    scroll-margin-block-start: var(--space-m);
   }
 
-  .track-heading p {
+  .research-entry__metadata {
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+  }
+
+  .research-entry__metadata p:first-child {
     margin-block-end: var(--space-s);
     color: var(--primary-strong);
-    font-size: var(--step--1);
     font-weight: 740;
   }
 
-  .track-heading h2 {
+  .research-entry__metadata p + p {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .research-entry__metadata time {
+    display: block;
+    margin-block-start: var(--space-s);
+  }
+
+  .research-entry__content {
+    max-width: var(--prose-width);
+  }
+
+  .research-entry__content h2 {
     font-size: var(--step-2);
   }
 
-  .track-copy {
-    max-width: var(--prose-width);
-    padding-block-start: var(--space-xs);
-  }
-
-  .track-copy > p:first-child {
+  .research-entry__summary {
+    margin-block: var(--space-s);
     font-size: var(--step-1);
     font-weight: 660;
     line-height: 1.4;
   }
 
-  .track-copy ul {
+  .research-entry__content h3 {
+    margin-block: var(--space-m) var(--space-s);
+    font-size: var(--step-0);
+  }
+
+  .research-entry__content ul {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin: var(--space-m) 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .track-copy li {
+  .research-entry__content li {
     padding: 0.2rem 0.55rem;
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -189,21 +169,14 @@ const renderedTracks = await Promise.all(
   }
 
   @media (max-width: 48rem) {
-    .research-hero__grid,
-    .section-heading,
-    .research-track__grid {
+    .research-entry {
       grid-template-columns: 1fr;
       align-items: start;
     }
   }
 
   @media (max-width: 24rem) {
-    .research-hero h1 {
-      font-size: var(--step-3);
-      line-height: 1.08;
-    }
-
-    .track-heading h2 {
+    .research-entry__content h2 {
       font-size: var(--step-1);
       line-height: 1.2;
     }
