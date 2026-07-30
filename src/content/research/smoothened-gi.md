@@ -13,6 +13,8 @@ methods:
   - "PLUMED"
 featured: true
 draft: false
+links:
+  doi: "https://doi.org/10.1073/pnas.2604658123"
 ---
 
 In the Goddard Lab, I modeled the oncoprotein Smoothened with molecular dynamics and metadynamics in GROMACS and PLUMED. This work determined the precoupled state and the mechanism for ligand activation of Smoothened.

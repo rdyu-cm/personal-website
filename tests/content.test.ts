@@ -13,6 +13,7 @@ import {
   sortByDateDescending,
   takeFeatured,
 } from "../src/lib/content";
+import { availableExternalLinks } from "../src/lib/external-links";
 
 const readSource = (path: string) =>
   readFileSync(resolve(import.meta.dirname, "..", path), "utf8");
@@ -45,6 +46,18 @@ const entries = [
 ];
 
 describe("content selectors", () => {
+  test("labels only configured external research and publication links", () => {
+    expect(
+      availableExternalLinks({
+        doi: "https://doi.org/10.1000/example",
+        code: "https://github.com/example/repository",
+      }),
+    ).toEqual([
+      { href: "https://doi.org/10.1000/example", label: "DOI" },
+      { href: "https://github.com/example/repository", label: "Code" },
+    ]);
+  });
+
   test("normalizes publication types to lowercase comparison keys", () => {
     expect(normalizePublicationType("  Preprint \n")).toBe("preprint");
   });
@@ -186,6 +199,12 @@ describe("content schemas", () => {
     ]) {
       expect(readSource(`src/content/research/${id}.md`)).toContain("summary:");
     }
+  });
+
+  test("includes a schema-valid optional link on a research record", () => {
+    expect(readSource("src/content/research/smoothened-gi.md")).toContain(
+      'doi: "https://doi.org/10.1073/pnas.2604658123"',
+    );
   });
 
   test("requires explicit date precision in both collection schemas and records", () => {

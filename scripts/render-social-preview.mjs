@@ -59,7 +59,7 @@ export async function renderSocialPreview() {
             margin: 0;
             font-size: 82px;
             line-height: 0.98;
-            letter-spacing: -0.045em;
+            letter-spacing: -0.04em;
           }
           .thesis {
             max-width: 680px;

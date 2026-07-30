@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import { normalizePublicationType } from "../lib/content";
 import { publicationFragmentId } from "../lib/structured-data";
 import { formatBehavioralDate } from "../lib/dates";
+import { availableExternalLinks } from "../lib/external-links";
 
 export interface Props {
   publications: CollectionEntry<"publications">[];
@@ -11,25 +12,12 @@ export interface Props {
 
 const { publications } = Astro.props;
 
-const linkLabels: Record<string, string> = {
-  doi: "DOI",
-  preprint: "Preprint",
-  code: "Code",
-  slides: "Slides",
-  bibtex: "BibTeX",
-  project: "Project",
-};
-
-const availableLinks = (publication: CollectionEntry<"publications">) =>
-  Object.entries(publication.data.links ?? {}).flatMap(([key, href]) =>
-    href ? [{ href, label: linkLabels[key] ?? key }] : [],
-  );
 ---
 
 <ol class="publication-list" role="list">
   {
     publications.map((publication) => {
-      const links = availableLinks(publication);
+      const links = availableExternalLinks(publication.data.links);
       const formattedDate = formatBehavioralDate(
         publication.data.date,
         publication.data.datePrecision,

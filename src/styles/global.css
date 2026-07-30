@@ -226,7 +226,9 @@ a:hover {
 }
 
 .nav-link {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   padding: 0.35rem 0.15rem;
   border-block-end: 2px solid transparent;
   color: var(--ink-muted);

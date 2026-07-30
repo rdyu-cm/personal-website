@@ -144,6 +144,20 @@ test("primary navigation exposes the four-page research profile", async ({
   ).toHaveAttribute("aria-current", "page");
 });
 
+test("mobile primary navigation links meet the minimum touch target height", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+
+  const navigation = page.getByRole("navigation", {
+    name: "Primary navigation",
+  });
+  for (const link of await navigation.getByRole("link").all()) {
+    expect((await link.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  }
+});
+
 test("uses softened twilight colors instead of white on black", async ({
   page,
 }) => {
@@ -212,6 +226,9 @@ test("research page renders three editable appointments without workflow scaffol
   await expect(
     page.getByRole("list", { name: "Research workflow" }),
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "DOI", exact: true }),
+  ).toHaveAttribute("href", "https://doi.org/10.1073/pnas.2604658123");
 });
 
 test("publications route combines publications and presentations", async ({
