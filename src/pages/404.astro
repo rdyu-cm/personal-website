@@ -15,8 +15,10 @@ const toRoute = (path: string) => `${base}${path}` || "/";
         <ul role="list">
           <li><a href={toRoute("/")}>Home</a></li>
           <li><a href={toRoute("/research")}>Research</a></li>
-          <li><a href={toRoute("/projects")}>Projects</a></li>
-          <li><a href={toRoute("/papers")}>Papers</a></li>
+          <li>
+            <a href={toRoute("/publications")}>Publications &amp; Presentations</a>
+          </li>
+          <li><a href={toRoute("/about")}>About</a></li>
         </ul>
       </nav>
     </div>

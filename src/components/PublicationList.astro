@@ -50,6 +50,12 @@ const availableLinks = (publication: CollectionEntry<"publications">) =>
             <cite>{publication.data.title}</cite>
           </p>
           <p class="publication-meta">
+            <span class="publication-type">
+              {publication.data.type === "journal"
+                ? "Publication"
+                : publication.data.type}
+            </span>
+            <span aria-hidden="true">·</span>
             <span>{publication.data.status}</span>
             <span aria-hidden="true">·</span>
             <time datetime={formattedDate.datetime}>
@@ -130,6 +136,10 @@ const availableLinks = (publication: CollectionEntry<"publications">) =>
 
   .publication-meta {
     font-size: var(--step--1);
+  }
+
+  .publication-type {
+    text-transform: capitalize;
   }
 
   .publication-summary {

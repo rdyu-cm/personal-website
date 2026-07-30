@@ -127,7 +127,7 @@ describe("buildScholarlyArticleJsonLd", () => {
     expect(jsonLd).not.toHaveProperty("isPartOf");
   });
 
-  test("does not represent a manuscript as a ScholarlyArticle", () => {
+  test("represents a manuscript as a ScholarlyArticle", () => {
     expect(
       buildScholarlyArticleJsonLd(
         publication({
@@ -135,7 +135,16 @@ describe("buildScholarlyArticleJsonLd", () => {
           status: "Submitted",
           venue: undefined,
         }),
-        "https://example.com/papers#example-publication",
+        "https://example.com/publications#example-publication",
+      ),
+    ).toMatchObject({ "@type": "ScholarlyArticle" });
+  });
+
+  test("does not represent a talk as a ScholarlyArticle", () => {
+    expect(
+      buildScholarlyArticleJsonLd(
+        publication({ type: "talk" }),
+        "https://example.com/publications#example-publication",
       ),
     ).toBeUndefined();
   });

@@ -24,12 +24,12 @@ const years = [...publicationsByYear.keys()].sort((a, b) => b - a);
 const filterDimension = "type";
 const filterOptions = publicationFilterOptions(publications, filterDimension);
 const showFilter = canFilterPublications(publications, filterDimension);
-const papersUrl = new URL(
+const publicationsUrl = new URL(
   Astro.url.pathname,
   Astro.site ?? Astro.url,
 ).toString();
 const scholarlyJsonLd = publications.flatMap((publication) => {
-  const canonicalUrl = new URL(papersUrl);
+  const canonicalUrl = new URL(publicationsUrl);
   canonicalUrl.hash = publicationFragmentId(publication.id);
   const jsonLd = buildScholarlyArticleJsonLd(
     publication,
@@ -40,16 +40,16 @@ const scholarlyJsonLd = publications.flatMap((publication) => {
 ---
 
 <BaseLayout
-  title="Papers"
-  description="Public manuscripts and research outputs by Ryan Yu."
+  title="Publications & Presentations"
+  description="Publications and presentations by Ryan Yu."
   jsonLd={scholarlyJsonLd.length > 0 ? scholarlyJsonLd : undefined}
 >
   <section class="page-header">
     <div class="container">
       <p class="eyebrow">Research outputs</p>
-      <h1>Papers</h1>
+      <h1>Publications &amp; Presentations</h1>
       <p class="lede">
-        Published research outputs, organized by year.
+        Published research outputs and presentations, organized by year.
       </p>
     </div>
   </section>

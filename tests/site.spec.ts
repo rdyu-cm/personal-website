@@ -1,16 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const auditedPaths = [
-  "/",
-  "/research",
-  "/projects",
-  "/projects/nitrate-reduction-electrolytes",
-  "/projects/smoothened-gi",
-  "/papers",
-  "/about",
-  "/cv",
-];
+const auditedPaths = ["/", "/research", "/publications", "/about", "/cv"];
 
 test.describe("accessibility regression checks", () => {
   test("public pages have no Axe violations", async ({ page }) => {
@@ -219,60 +210,16 @@ test("research page renders three editable appointments without workflow scaffol
   ).toHaveCount(0);
 });
 
-test("projects index links to public case studies with research-document sections", async ({
+test("publications route combines publications and presentations", async ({
   page,
 }) => {
-  await page.goto("/projects");
-
-  const projectLinks = page.locator('main a[href^="/projects/"]');
-  await expect(projectLinks.first()).toBeVisible();
-  await projectLinks.first().click();
+  await page.goto("/publications");
 
   await expect(
-    page.getByRole("heading", { name: "Scientific question" }),
-  ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Approach" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Validation and results" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Reproducibility" }),
-  ).toBeVisible();
-  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
-});
-
-test("each public project route renders required headings and dates", async ({
-  page,
-}) => {
-  for (const [path, datetime, label] of [
-    ["/projects/rotskoff-protein-representations", "2026-06", "June 2026"],
-    ["/projects/nitrate-reduction-electrolytes", "2024-12", "December 2024"],
-    ["/projects/smoothened-gi", "2023-12", "December 2023"],
-  ]) {
-    await page.goto(path);
-    for (const heading of [
-      "Scientific question",
-      "Approach",
-      "Validation and results",
-      "Reproducibility",
-      "Project record",
-    ]) {
-      await expect(page.getByRole("heading", { name: heading })).toBeVisible();
-    }
-    await expect(page.locator(`time[datetime='${datetime}']`)).toHaveText(
-      label,
-    );
-    await expect(page.locator("time[datetime='2024-01-01']")).toHaveCount(0);
-  }
-});
-
-test("papers page preserves publication authors, status, and date precision", async ({
-  page,
-}) => {
-  await page.goto("/papers");
-
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Papers" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "Publications & Presentations",
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 2, name: "2026" }),
@@ -304,6 +251,18 @@ test("papers page preserves publication authors, status, and date precision", as
     "data-publication-type",
     "journal",
   );
+  await expect(
+    publicationTypes.first().locator(".publication-type"),
+  ).toHaveText("Publication");
+});
+
+test("obsolete project and papers routes are not public pages", async ({
+  page,
+}) => {
+  for (const path of ["/papers", "/projects", "/projects/smoothened-gi"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+  }
 });
 
 test("about page renders only the manually authored article", async ({
@@ -358,8 +317,8 @@ test("missing routes render a branded, base-safe not-found page", async ({
   for (const [name, href] of [
     ["Home", "/"],
     ["Research", "/research"],
-    ["Projects", "/projects"],
-    ["Papers", "/papers"],
+    ["Publications & Presentations", "/publications"],
+    ["About", "/about"],
   ]) {
     await expect(
       page.getByRole("main").getByRole("link", { name, exact: true }),

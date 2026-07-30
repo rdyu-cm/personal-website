@@ -19,7 +19,12 @@ export const publicationFragmentId = (entryId: string) =>
   `publication-${[...new TextEncoder().encode(entryId)].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 
 const httpUrl = /^https?:\/\//i;
-const scholarlyTypes = new Set(["journal", "conference", "preprint"]);
+const scholarlyTypes = new Set([
+  "journal",
+  "conference",
+  "preprint",
+  "manuscript",
+]);
 
 export const buildPersonJsonLd = (
   profile: Profile,
