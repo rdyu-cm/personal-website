@@ -14,9 +14,9 @@ export function defineProfile(value: Profile): Profile {
 
 export const profile = defineProfile({
   name: "Ryan Yu",
-  headline: "Chemical Engineering Undergraduate · AI for Science",
+  headline: "Computational Chemical Engineering Undergraduate · AI for Science",
   homepageSummary:
-    "Interpretable protein representations, machine-learned potentials, and molecular mechanisms.",
+    "Interpretable protein representations, machine-learned potentials, and molecular simulation",
   affiliation: "California Institute of Technology",
   shortBio:
     "Caltech Chemical Engineering (Computational) undergraduate working across interpretable protein representations, machine-learned interatomic potentials, and molecular simulation.",
