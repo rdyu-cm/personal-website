@@ -1,188 +1,78 @@
 ---
 import { getCollection } from "astro:content";
 
-import ProjectCard from "../components/ProjectCard.astro";
 import PublicationList from "../components/PublicationList.astro";
+import ResearchList from "../components/ResearchList.astro";
 import { profile } from "../data/profile";
 import { takeFeatured } from "../lib/content";
 import { buildPersonJsonLd } from "../lib/structured-data";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const featuredProjects = takeFeatured(await getCollection("projects"), 3);
-const featuredPublications = takeFeatured(await getCollection("publications"), 3);
+const featuredResearch = takeFeatured(await getCollection("research"), 3);
+const latestOutputs = takeFeatured(await getCollection("publications"), 3);
+const linkedIn = profile.links.find((link) => link.label === "LinkedIn");
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const toRoute = (path: string) => `${base}${path}` || "/";
 const personJsonLd = buildPersonJsonLd(
   profile,
   Astro.site?.toString() ?? profile.domain,
 );
-
-const researchThemes = [
-  {
-    title: "AI/ML potentials",
-    description:
-      "Developing machine-learned potentials from first-principles calculations for nitrate-reduction electrolytes and TiH2/electrolyte interfaces.",
-  },
-  {
-    title: "Molecular simulation",
-    description:
-      "Using molecular dynamics and metadynamics to examine interfacial distributions, conformational states, and free-energy barriers.",
-  },
-  {
-    title: "Chemical questions",
-    description:
-      "Connecting computation to electrochemical interfaces and biomolecular activation mechanisms.",
-  },
-];
-
-const currentResearch = [
-  {
-    id: "rotskoff-protein-representations",
-    lab: "Rotskoff Lab",
-    institution: "Stanford University · June 2026–present",
-  },
-  {
-    id: "nitrate-reduction-electrolytes",
-    lab: "Fong Lab",
-    institution: "Caltech · December 2024–present",
-  },
-  {
-    id: "smoothened-gi",
-    lab: "Goddard Lab",
-    institution: "Caltech · December 2023–present",
-    supplement: "Simulations use GROMACS and PLUMED.",
-  },
-].flatMap((record) => {
-  const project = featuredProjects.find((entry) => entry.id === record.id);
-  return project ? [{ ...record, project }] : [];
-});
 ---
 
-<BaseLayout title={profile.name} description={profile.shortBio} jsonLd={personJsonLd}>
+<BaseLayout
+  title={profile.name}
+  description={profile.homepageSummary}
+  jsonLd={personJsonLd}
+>
   <section class="home-hero">
-    <div class="container home-hero__inner">
-      <ul class="hero-tags" aria-label="Research areas">
-        <li>AI for science</li>
-        <li>Molecular simulation</li>
-      </ul>
-      <h1>{profile.name}</h1>
-      <p class="hero-thesis">
-        Interpretable protein representations, machine-learned potentials, and
-        molecular mechanisms.
-      </p>
-      <a class="button button--secondary" href={toRoute("/research")}>
-        Explore current research
-      </a>
-    </div>
-  </section>
-
-  <section
-    class="current-research"
-    aria-labelledby="current-research-title"
-  >
-    <div class="container">
-      <div class="section-heading section-heading--split">
-        <h2 id="current-research-title">Current Research</h2>
-        <p>
-          Three complementary routes from representation and simulation to
-          mechanism.
-        </p>
-      </div>
-      <div class="research-row-list">
+    <div class="container home-hero__grid">
+      <div class="hero-copy">
+        <p class="hero-headline">{profile.headline}</p>
+        <h1>{profile.name}</h1>
         {
-          currentResearch.map(({ project, lab, institution, supplement }) => (
-            <article class="research-row">
-              <div>
-                <h3>{lab}</h3>
-                <p class="research-row__meta">{institution}</p>
-              </div>
-              <p>
-                {project.data.summary}
-                {supplement && ` ${supplement}`}
-              </p>
-              <a href={toRoute(`/research#${project.id}`)}>
-                View research<span class="sr-only"> in the {lab}</span>
+          profile.affiliation && (
+            <p class="hero-affiliation">{profile.affiliation}</p>
+          )
+        }
+        <p class="hero-summary">{profile.homepageSummary}</p>
+        <div class="hero-actions">
+          <a class="button" href={`${base}/research`}>Research</a>
+          {
+            linkedIn && (
+              <a
+                class="button button--secondary"
+                href={linkedIn.href}
+                aria-label={`${profile.name} on LinkedIn`}
+              >
+                LinkedIn
               </a>
-            </article>
-          ))
-        }
+            )
+          }
+        </div>
       </div>
-    </div>
-  </section>
-
-  <section class="home-section research-interests" aria-labelledby="research-interests-title">
-    <div class="container">
-      <div class="section-heading">
-        <h2 id="research-interests-title">Research interests</h2>
-        <p>
-          Computational chemical engineering across learned representations,
-          molecular-scale dynamics, and physically grounded interpretation.
-        </p>
-      </div>
-      <dl class="theme-list">
-        {
-          researchThemes.map((theme) => (
-            <div>
-              <dt>{theme.title}</dt>
-              <dd>{theme.description}</dd>
-            </div>
-          ))
-        }
-      </dl>
+      <div class="hero-orbit" aria-hidden="true"><span></span></div>
     </div>
   </section>
 
   {
-    featuredProjects.length > 0 && (
-      <section class="home-section selected-work" aria-labelledby="selected-work-title">
+    featuredResearch.length > 0 && (
+      <section
+        class="home-section research-section"
+        aria-labelledby="research-title"
+      >
         <div class="container">
-          <div class="section-heading section-heading--split">
-            <h2 id="selected-work-title">Selected projects</h2>
-            <p>Current research spanning electrochemical and biomolecular systems.</p>
-          </div>
-          <div class="project-list">
-            {featuredProjects.map((project) => (
-              <ProjectCard
-                project={project}
-                href={toRoute(`/research#${project.id}`)}
-                linkLabel={`Explore ${project.data.title}`}
-              />
-            ))}
-          </div>
+          <h2 id="research-title">Current research</h2>
+          <ResearchList research={featuredResearch} />
         </div>
       </section>
     )
   }
 
   {
-    featuredPublications.length > 0 && (
+    latestOutputs.length > 0 && (
       <section class="home-section outputs" aria-labelledby="outputs-title">
         <div class="container">
-          <div class="section-heading section-heading--split">
-            <h2 id="outputs-title">Research outputs</h2>
-            <p>Public manuscripts and related research records.</p>
-          </div>
-          <PublicationList publications={featuredPublications} />
-        </div>
-      </section>
-    )
-  }
-
-  {
-    profile.links.length > 0 && (
-      <section class="contact-band" aria-labelledby="contact-title">
-        <div class="container contact-band__inner">
-          <div>
-            <h2 id="contact-title">Contact</h2>
-            <p>For research correspondence or code, use the public channels below.</p>
-          </div>
-          <ul aria-label="Contact links">
-            {profile.links.map((link) => (
-              <li>
-                <a href={link.href}>{link.label}</a>
-              </li>
-            ))}
-          </ul>
+          <h2 id="outputs-title">Latest publications &amp; presentations</h2>
+          <PublicationList publications={latestOutputs} />
         </div>
       </section>
     )
@@ -191,214 +81,167 @@ const currentResearch = [
 
 <style>
   .home-hero {
-    padding-block: clamp(3.5rem, 8vw, 5.5rem);
+    overflow: hidden;
     border-block-end: 1px solid var(--border);
-    background: var(--surface);
+    background:
+      radial-gradient(
+        circle at 84% 52%,
+        color-mix(in oklch, var(--accent) 12%, transparent),
+        transparent 28rem
+      ),
+      var(--surface);
   }
 
-  .home-hero__inner {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: column;
+  .home-hero__grid {
+    min-height: clamp(32rem, 70vh, 43rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.74fr);
+    align-items: center;
+    gap: var(--space-l) var(--space-xl);
+    padding-block: var(--space-xl);
   }
 
-  .hero-tags {
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 46rem;
+  }
+
+  .hero-headline {
+    margin-block-end: var(--space-m);
+    color: var(--primary-strong);
+    font-size: var(--step-0);
+    font-weight: 720;
+  }
+
+  .hero-affiliation {
+    margin-block-start: var(--space-s);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .hero-summary {
+    max-width: 39rem;
+    margin-block-start: var(--space-l);
+    color: var(--ink);
+    font-size: var(--step-2);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.32;
+  }
+
+  .hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs);
-    margin: 0 0 var(--space-m);
-    padding: 0;
-    list-style: none;
+    gap: var(--space-s);
+    margin-block-start: var(--space-l);
   }
 
-  .hero-tags li {
-    padding: 0.25rem 0.7rem;
-    border: 1px solid var(--primary);
-    border-radius: 999px;
-    color: var(--primary-strong);
-    background: color-mix(in oklch, var(--primary) 18%, var(--surface));
-    font-weight: 680;
+  .hero-orbit {
+    position: relative;
+    width: min(100%, 29rem);
+    aspect-ratio: 1;
+    justify-self: end;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at center,
+        transparent 0 27%,
+        color-mix(in oklch, var(--primary) 24%, transparent) 27.5% 28%,
+        transparent 28.5% 44%,
+        color-mix(in oklch, var(--accent) 18%, transparent) 44.5% 45%,
+        transparent 45.5%
+      ),
+      radial-gradient(
+        circle at 28% 30%,
+        color-mix(in oklch, var(--primary) 20%, transparent),
+        transparent 44%
+      ),
+      radial-gradient(
+        circle at 72% 68%,
+        color-mix(in oklch, var(--accent) 15%, transparent),
+        transparent 42%
+      );
+    pointer-events: none;
   }
 
-  .hero-tags li:nth-child(2) {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: color-mix(in oklch, var(--accent) 14%, var(--surface));
+  .hero-orbit::before,
+  .hero-orbit::after {
+    content: "";
+    position: absolute;
+    inset: 12%;
+    border: 1px solid
+      color-mix(in oklch, var(--primary-strong) 52%, transparent);
+    border-radius: 50%;
   }
 
-  .hero-thesis {
-    max-width: 42rem;
-    margin-block-start: var(--space-m);
-    font-size: var(--step-2);
-    font-weight: 660;
-    line-height: 1.28;
-    letter-spacing: -0.02em;
+  .hero-orbit::before {
+    transform: rotate(28deg) scaleY(0.42);
   }
 
-  .home-hero .button { margin-block-start: var(--space-m); }
+  .hero-orbit::after {
+    transform: rotate(-38deg) scaleY(0.58);
+    border-color: color-mix(in oklch, var(--accent) 48%, transparent);
+  }
 
-  .current-research,
+  .hero-orbit span {
+    position: absolute;
+    inset: 35%;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 34% 30%,
+        color-mix(in oklch, var(--ink) 75%, transparent) 0 4%,
+        transparent 5%
+      ),
+      radial-gradient(
+        circle at 38% 34%,
+        var(--primary-strong),
+        var(--primary) 36%,
+        color-mix(in oklch, var(--surface) 78%, var(--primary)) 72%
+      );
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--primary-strong) 54%, transparent),
+      0 0 3rem color-mix(in oklch, var(--primary) 24%, transparent);
+  }
+
   .home-section {
     padding-block: var(--space-xl);
   }
 
-  .current-research {
-    border-block-end: 1px solid var(--border);
+  .home-section h2 {
+    margin-block-end: var(--space-l);
+  }
+
+  .research-section {
     background: var(--canvas);
   }
 
-  .research-interests, .outputs { background: var(--canvas); }
-
-  .selected-work {
-    border-block: 1px solid var(--border);
+  .outputs {
+    border-block-start: 1px solid var(--border);
     background: var(--surface);
   }
 
-  .section-heading { margin-block-end: var(--space-l); }
-
-  .section-heading--split {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: var(--space-m) var(--space-xl);
-  }
-
-  .section-heading p {
-    margin-block-start: var(--space-s);
-    color: var(--ink-muted);
-  }
-
-  .section-heading--split p {
-    max-width: 32rem;
-    margin-block-start: 0;
-  }
-
-  .research-row-list {
-    border-block-start: 1px solid var(--border);
-  }
-
-  .research-row {
-    display: grid;
-    grid-template-columns: minmax(11rem, 0.34fr) minmax(0, 1fr) auto;
-    align-items: start;
-    gap: var(--space-s) var(--space-l);
-    padding-block: var(--space-m);
-    border-block-end: 1px solid var(--border);
-  }
-
-  .research-row h3 {
-    font-size: var(--step-1);
-    line-height: 1.2;
-  }
-
-  .research-row__meta {
-    margin-block-start: var(--space-xs);
-    color: var(--ink-muted);
-    font-size: var(--step--1);
-  }
-
-  .research-row > p {
-    max-width: 50rem;
-    color: var(--ink-muted);
-    font-size: var(--step-0);
-  }
-
-  .research-row > a {
-    font-weight: 720;
-    white-space: nowrap;
-  }
-
-  .theme-list {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin: 0;
-    padding: 0;
-    border-block-start: 1px solid var(--border);
-  }
-
-  .theme-list > div {
-    min-width: 0;
-    padding: var(--space-m);
-  }
-
-  .theme-list > div + div { border-inline-start: 1px solid var(--border); }
-
-  .theme-list dt {
-    font-size: var(--step-1);
-    font-weight: 740;
-  }
-
-  .theme-list dd {
-    margin: var(--space-s) 0 0;
-    color: var(--ink-muted);
-  }
-
-  .project-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    gap: var(--space-m);
-  }
-
-  .contact-band {
-    padding-block: var(--space-xl);
-    color: var(--canvas);
-    background: var(--primary-strong);
-  }
-
-  .contact-band__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-m) var(--space-xl);
-  }
-
-  .contact-band h2 {
-    color: var(--canvas);
-    font-size: var(--step-2);
-  }
-
-  .contact-band p {
-    margin-block-start: var(--space-xs);
-    color: var(--surface-strong);
-  }
-
-  .contact-band ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-s) var(--space-m);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .contact-band a {
-    color: var(--canvas);
-    font-weight: 720;
-    text-decoration-color: var(--primary);
-  }
-
   @media (max-width: 48rem) {
-    .research-row {
+    .home-hero__grid {
+      min-height: 0;
       grid-template-columns: 1fr;
+      align-items: start;
     }
 
-    .section-heading--split,
-    .contact-band__inner {
-      align-items: flex-start;
-      flex-direction: column;
+    .hero-orbit {
+      width: min(78vw, 21rem);
+      justify-self: center;
     }
-
-    .theme-list { grid-template-columns: 1fr; }
-
-    .theme-list > div {
-      padding-inline: 0;
-      border-block-end: 1px solid var(--border);
-    }
-
-    .theme-list > div + div { border-inline-start: 0; }
   }
 
   @media (max-width: 24rem) {
-    .hero-thesis { font-size: var(--step-1); }
+    .hero-summary {
+      font-size: var(--step-1);
+    }
+
+    .hero-actions .button {
+      flex: 1;
+    }
   }
 </style>

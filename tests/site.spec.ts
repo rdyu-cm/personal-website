@@ -167,7 +167,7 @@ test("uses softened twilight colors instead of white on black", async ({
   expect(colors.background).not.toBe("rgb(0, 0, 0)");
 });
 
-test("homepage presents the public research overview with one primary heading", async ({
+test("homepage presents identity, three research rows, and latest outputs", async ({
   page,
 }) => {
   await page.goto("/");
@@ -175,111 +175,35 @@ test("homepage presents the public research overview with one primary heading", 
   await expect(
     page.getByRole("heading", { level: 1, name: "Ryan Yu" }),
   ).toHaveCount(1);
-  const researchAreas = page.getByRole("list", { name: "Research areas" });
-  await expect(page.locator(".hero-tags li")).toHaveCount(2);
   await expect(
-    researchAreas.getByText("AI for science", { exact: true }),
+    page.getByText("California Institute of Technology", { exact: true }),
   ).toBeVisible();
   await expect(
-    researchAreas.getByText("Molecular simulation", { exact: true }),
-  ).toBeVisible();
+    page.getByRole("list", { name: "Current research" }).getByRole("listitem"),
+  ).toHaveCount(3);
   await expect(
-    page.getByText(
-      "Interpretable protein representations, machine-learned potentials, and molecular mechanisms.",
-      { exact: true },
-    ),
+    page.getByRole("heading", {
+      name: "Latest publications & presentations",
+    }),
   ).toBeVisible();
-
-  const currentResearch = page.getByRole("region", {
-    name: "Current Research",
-  });
-  const researchRows = currentResearch.getByRole("article");
-  await expect(researchRows).toHaveCount(3);
-  for (const [index, lab] of [
-    "Rotskoff Lab",
-    "Fong Lab",
-    "Goddard Lab",
-  ].entries()) {
-    await expect(researchRows.nth(index)).toContainText(lab);
-  }
-  await expect(researchRows.nth(0)).toContainText("BioEmu and ESM3");
-  await expect(researchRows.nth(1)).toContainText("LAMMPS and CP2K");
-  await expect(researchRows.nth(2)).toContainText("GROMACS and PLUMED");
-  await expect(
-    page.getByRole("link", { name: "Ryan Yu on LinkedIn" }),
-  ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
-
-  const researchCopySizes = await researchRows
-    .locator(":scope > p")
-    .evaluateAll((elements) =>
-      elements.map((element) =>
-        Number.parseFloat(getComputedStyle(element).fontSize),
-      ),
-    );
-  expect(researchCopySizes).toHaveLength(3);
-  for (const researchCopySize of researchCopySizes) {
-    expect(researchCopySize).toBeGreaterThanOrEqual(16);
-  }
-
   await expect(
     page.getByRole("heading", { name: "Research interests" }),
-  ).toBeVisible();
-  await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
+  ).toHaveCount(0);
   await expect(
-    page.getByRole("article").filter({
-      hasText: "Machine-learned potentials for nitrate-reduction electrolytes",
-    }),
-  ).toContainText("2024");
+    page.getByRole("heading", { name: "Selected projects" }),
+  ).toHaveCount(0);
   await expect(
-    page.getByRole("article").filter({
-      hasText: "Machine-learned potentials for nitrate-reduction electrolytes",
-    }),
-  ).not.toContainText("January");
+    page
+      .locator(".hero-actions")
+      .getByRole("link", { name: "Ryan Yu on LinkedIn" }),
+  ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
+  await expect(page.locator(".hero-orbit[aria-hidden='true']")).toHaveCount(1);
   await expect(
     page.getByText(
       "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
       { exact: true },
     ),
   ).toBeVisible();
-  const smoothenedPublication = page.locator(".publication-item").filter({
-    has: page.getByText(
-      "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
-      { exact: true },
-    ),
-  });
-  await expect(
-    smoothenedPublication.getByText("Published", { exact: true }),
-  ).toBeVisible();
-  for (const selector of [".publication-authors", ".publication-links a"]) {
-    const copySizes = await smoothenedPublication
-      .locator(selector)
-      .evaluateAll((elements) =>
-        elements.map((element) =>
-          Number.parseFloat(getComputedStyle(element).fontSize),
-        ),
-      );
-    expect(copySizes.length).toBeGreaterThan(0);
-    for (const copySize of copySizes) {
-      expect(copySize).toBeGreaterThanOrEqual(16);
-    }
-  }
-
-  const contactPadding = await page
-    .locator(".contact-band")
-    .evaluate((element) => {
-      const probe = document.createElement("div");
-      probe.style.paddingBlockStart = "var(--space-xl)";
-      element.append(probe);
-      const expected = Number.parseFloat(
-        getComputedStyle(probe).paddingBlockStart,
-      );
-      probe.remove();
-      return {
-        actual: Number.parseFloat(getComputedStyle(element).paddingBlockStart),
-        expected,
-      };
-    });
-  expect(contactPadding.actual).toBeCloseTo(contactPadding.expected);
   await expect(page.locator(".publication-list")).toHaveAttribute(
     "role",
     "list",
