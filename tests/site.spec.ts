@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const auditedPaths = ["/", "/research", "/publications", "/about", "/cv"];
+const auditedPaths = ["/", "/missing-page"];
 
 test.describe("accessibility regression checks", () => {
   test("public pages have no Axe violations", async ({ page }) => {
@@ -26,16 +26,6 @@ test.describe("accessibility regression checks", () => {
     }
   });
 
-  test("every rendered research image has nonblank alternative text", async ({
-    page,
-  }) => {
-    await page.goto("/research");
-    const researchImages = page.locator("main img");
-    for (let image = 0; image < (await researchImages.count()); image += 1) {
-      await expect(researchImages.nth(image)).toHaveAttribute("alt", /\S/);
-    }
-  });
-
   test("public pages do not skip heading levels", async ({ page }) => {
     for (const path of auditedPaths) {
       await page.goto(path);
@@ -51,11 +41,11 @@ test.describe("accessibility regression checks", () => {
     }
   });
 
-  test("research appointments remain visible with reduced motion", async ({
+  test("research entries remain visible with reduced motion", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/research");
+    await page.goto("/");
     const researchEntries = page.locator(".research-entry");
     await expect(researchEntries).toHaveCount(3);
     for (let index = 0; index < (await researchEntries.count()); index += 1) {
@@ -64,24 +54,28 @@ test.describe("accessibility regression checks", () => {
   });
 });
 
-test("shared shell exposes page landmarks", async ({ page }) => {
+test("shared shell exposes page landmarks without a navigation chrome", async ({
+  page,
+}) => {
   await page.goto("/");
 
-  await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("main")).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();
+  await expect(page.getByRole("navigation")).toHaveCount(0);
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
     "href",
     "/favicon.svg",
   );
 });
 
-test("shared SEO exposes the Deep Orbit social preview", async ({ page }) => {
+test("shared SEO exposes the light theme and social preview", async ({
+  page,
+}) => {
   await page.goto("/");
 
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
     "content",
-    "#251f37",
+    "#fbfcfd",
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
@@ -117,48 +111,7 @@ test("skip link is first in the focus order and moves focus to main", async ({
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("primary navigation exposes the four-page research profile", async ({
-  page,
-}) => {
-  await page.goto("/");
-
-  const navigation = page.getByRole("navigation", {
-    name: "Primary navigation",
-  });
-  for (const [name, href] of [
-    ["Home", "/"],
-    ["Research", "/research"],
-    ["Publications & Presentations", "/publications"],
-    ["About", "/about"],
-  ]) {
-    await expect(
-      navigation.getByRole("link", { name, exact: true }),
-    ).toHaveAttribute("href", href);
-  }
-  await expect(navigation.getByRole("link", { name: "Projects" })).toHaveCount(
-    0,
-  );
-  await expect(navigation.getByRole("link", { name: "Papers" })).toHaveCount(0);
-  await expect(
-    navigation.getByRole("link", { name: "Home", exact: true }),
-  ).toHaveAttribute("aria-current", "page");
-});
-
-test("mobile primary navigation links meet the minimum touch target height", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 320, height: 720 });
-  await page.goto("/");
-
-  const navigation = page.getByRole("navigation", {
-    name: "Primary navigation",
-  });
-  for (const link of await navigation.getByRole("link").all()) {
-    expect((await link.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-  }
-});
-
-test("uses softened twilight colors instead of white on black", async ({
+test("uses a softened light ground rather than pure black on white", async ({
   page,
 }) => {
   await page.goto("/");
@@ -167,11 +120,51 @@ test("uses softened twilight colors instead of white on black", async ({
     const style = getComputedStyle(body);
     return { color: style.color, background: style.backgroundColor };
   });
+  expect(colors.color).not.toBe("rgb(0, 0, 0)");
   expect(colors.color).not.toBe("rgb(255, 255, 255)");
+  expect(colors.background).not.toBe("rgb(255, 255, 255)");
   expect(colors.background).not.toBe("rgb(0, 0, 0)");
 });
 
-test("homepage presents identity, three research rows, and latest outputs", async ({
+test("accent text meets the AA contrast floor against the page ground", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const contrast = await page
+    .getByRole("heading", { level: 2, name: "Research" })
+    .evaluate((heading) => {
+      // Chromium serializes oklch() colors verbatim, so rasterize each color
+      // through a canvas to recover its actual sRGB bytes.
+      const context = document.createElement("canvas").getContext("2d");
+      if (!context) throw new Error("Expected a 2D canvas context.");
+      const toRgb = (color: string) => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+      };
+      const channel = (value: number) => {
+        const srgb = value / 255;
+        return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+      };
+      const luminance = (rgb: number[]) =>
+        0.2126 * channel(rgb[0]) +
+        0.7152 * channel(rgb[1]) +
+        0.0722 * channel(rgb[2]);
+
+      const ink = luminance(toRgb(getComputedStyle(heading).color));
+      const ground = luminance(
+        toRgb(getComputedStyle(document.body).backgroundColor),
+      );
+      const [light, dark] = ink > ground ? [ink, ground] : [ground, ink];
+      return (light + 0.05) / (dark + 0.05);
+    });
+
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+});
+
+test("the single page presents identity, about, research, and publications", async ({
   page,
 }) => {
   await page.goto("/");
@@ -179,155 +172,114 @@ test("homepage presents identity, three research rows, and latest outputs", asyn
   await expect(
     page.getByRole("heading", { level: 1, name: "Ryan Yu" }),
   ).toHaveCount(1);
-  await expect(
-    page.getByText("California Institute of Technology", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("list", { name: "Current research" }).getByRole("listitem"),
-  ).toHaveCount(3);
-  await expect(
-    page.getByRole("heading", {
-      name: "Latest publications & presentations",
-    }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Research interests" }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Selected projects" }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .locator(".hero-actions")
-      .getByRole("link", { name: "Ryan Yu on LinkedIn" }),
-  ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
-  await expect(page.locator(".hero-orbit[aria-hidden='true']")).toHaveCount(1);
-  await expect(
-    page.getByText(
-      "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
-      { exact: true },
-    ),
-  ).toBeVisible();
-  await expect(page.locator(".publication-list")).toHaveAttribute(
-    "role",
-    "list",
+  await expect(page.locator(".identity__role")).toContainText(
+    "California Institute of Technology",
   );
-});
 
-test("research page renders three editable appointments without workflow scaffolding", async ({
-  page,
-}) => {
-  await page.goto("/research");
-
-  await expect(page.locator(".research-entry")).toHaveCount(3);
-  for (const lab of ["Rotskoff Lab", "Fong Lab", "Goddard Lab"]) {
-    await expect(page.getByText(lab, { exact: true })).toBeVisible();
+  for (const section of ["About", "Research", "Publications & Presentations"]) {
+    await expect(
+      page.getByRole("heading", { level: 2, name: section }),
+    ).toBeVisible();
   }
-  await expect(
-    page.getByRole("list", { name: "Research workflow" }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: "DOI", exact: true }),
-  ).toHaveAttribute("href", "https://doi.org/10.1073/pnas.2604658123");
-});
 
-test("publications route combines publications and presentations", async ({
-  page,
-}) => {
-  await page.goto("/publications");
+  await expect(page.getByRole("list", { name: "Research" })).toBeVisible();
+  await expect(page.locator(".research-entry")).toHaveCount(3);
+  const affiliations = page.locator(".research-entry__affiliation");
+  await expect(affiliations).toHaveCount(3);
+  for (const lab of ["Rotskoff Lab", "Fong Lab", "Goddard Lab"]) {
+    await expect(affiliations.filter({ hasText: lab })).toHaveCount(1);
+  }
 
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "Publications & Presentations",
-    }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 2, name: "2026" }),
-  ).toBeVisible();
   await expect(
     page.getByText(
       "The Mechanism for Ligand Activation of the Smoothened G Protein-Coupled Receptor",
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByText("Published", { exact: true })).toBeVisible();
   await expect(
     page.getByText(
       "Ryan D. Yu, Amy-Doan P. Vo, Soo-Kyung Kim, William A. Goddard III",
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: /DOI/i })).toHaveAttribute(
-    "href",
-    "https://doi.org/10.1073/pnas.2604658123",
-  );
   await expect(page.locator("time[datetime='2026']")).toHaveText("2026");
-  await expect(page.locator("time[datetime='2025-01-01']")).toHaveCount(0);
   await expect(page.getByText(/\bdraft\b/i)).toHaveCount(0);
-  await expect(page.getByRole("combobox")).toHaveCount(0);
-  const publicationTypes = page.locator("[data-publication-type]");
-  await expect(publicationTypes).toHaveCount(1);
-  await expect(publicationTypes.first()).toHaveAttribute(
-    "data-publication-type",
-    "journal",
-  );
-  await expect(
-    publicationTypes.first().locator(".publication-type"),
-  ).toHaveText("Publication");
 });
 
-test("obsolete project and papers routes are not public pages", async ({
+test("research methods render as plain text rather than chips", async ({
   page,
 }) => {
-  for (const path of ["/papers", "/projects", "/projects/smoothened-gi"]) {
+  await page.goto("/");
+
+  const methods = page.locator(".research-entry__methods").first();
+  await expect(methods).toHaveText("Sparse autoencoders · BioEmu · ESM3");
+  await expect(methods.locator("li")).toHaveCount(0);
+});
+
+test("external scholarship links resolve to their sources", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const doiLinks = page.getByRole("link", { name: "DOI", exact: true });
+  await expect(doiLinks).toHaveCount(2);
+  for (let index = 0; index < (await doiLinks.count()); index += 1) {
+    await expect(doiLinks.nth(index)).toHaveAttribute(
+      "href",
+      "https://doi.org/10.1073/pnas.2604658123",
+    );
+  }
+  await expect(
+    page.getByRole("link", { name: "Ryan Yu on LinkedIn", exact: true }),
+  ).toHaveAttribute("href", "https://www.linkedin.com/in/ryan-yu-0bb27a23b");
+  await expect(
+    page.getByRole("link", { name: "Email Ryan Yu", exact: true }),
+  ).toHaveAttribute("href", "mailto:rdyu@caltech.edu");
+  await expect(
+    page.getByRole("link", { name: "Ryan Yu on GitHub", exact: true }),
+  ).toHaveAttribute("href", "https://github.com/rdyu-cm");
+});
+
+test("structured data covers the person and the published article", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const jsonLd = page.locator('script[type="application/ld+json"]');
+  await expect(jsonLd).toHaveCount(1);
+  const parsed = JSON.parse(
+    await jsonLd.evaluate((script) => script.innerHTML),
+  );
+
+  expect(parsed).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        "@type": "Person",
+        url: "http://127.0.0.1:4321/",
+      }),
+      expect.objectContaining({
+        "@type": "ScholarlyArticle",
+        datePublished: "2026",
+      }),
+    ]),
+  );
+});
+
+test("retired routes render the branded not-found page", async ({ page }) => {
+  for (const path of [
+    "/research",
+    "/publications",
+    "/about",
+    "/cv",
+    "/papers",
+    "/projects",
+  ]) {
     const response = await page.goto(path);
     expect(response?.status()).toBe(404);
   }
 });
 
-test("about page renders only the manually authored article", async ({
-  page,
-}) => {
-  await page.goto("/about");
-
-  await expect(
-    page.getByRole("article", { name: "About Ryan Yu" }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("Research appointments", { exact: true }),
-  ).toHaveCount(0);
-});
-
-test("about Person JSON-LD uses Astro's configured canonical site", async ({
-  page,
-}) => {
-  await page.goto("/about");
-
-  const personJsonLd = page.locator('script[type="application/ld+json"]');
-  await expect(personJsonLd).toHaveCount(1);
-  expect(
-    JSON.parse(await personJsonLd.evaluate((script) => script.innerHTML)),
-  ).toMatchObject({ url: "http://127.0.0.1:4321/" });
-});
-
-test("CV route uses the branded not-found page without private contact data", async ({
-  page,
-}) => {
-  const response = await page.goto("/cv");
-
-  expect(response?.status()).toBe(404);
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Page not found" }),
-  ).toBeVisible();
-  await expect(page.locator('a[href$=".pdf"]')).toHaveCount(0);
-  await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
-  await expect(page.locator("body")).not.toContainText(
-    /\b\d{3}[-.)\s]\d{3}[-.]\d{4}\b/,
-  );
-});
-
-test("missing routes render a branded, base-safe not-found page", async ({
+test("the not-found page offers a single base-safe way home", async ({
   page,
 }) => {
   await page.goto("/missing-page");
@@ -335,14 +287,12 @@ test("missing routes render a branded, base-safe not-found page", async ({
   await expect(
     page.getByRole("heading", { level: 1, name: "Page not found" }),
   ).toBeVisible();
-  for (const [name, href] of [
-    ["Home", "/"],
-    ["Research", "/research"],
-    ["Publications & Presentations", "/publications"],
-    ["About", "/about"],
-  ]) {
-    await expect(
-      page.getByRole("main").getByRole("link", { name, exact: true }),
-    ).toHaveAttribute("href", href);
-  }
+  await expect(
+    page.getByRole("main").getByRole("link", { name: "Back to home" }),
+  ).toHaveAttribute("href", "/");
+  await expect(page.locator('a[href$=".pdf"]')).toHaveCount(0);
+  await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+  await expect(page.locator("body")).not.toContainText(
+    /\b\d{3}[-.)\s]\d{3}[-.]\d{4}\b/,
+  );
 });

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, test } from "vitest";
@@ -14,6 +14,20 @@ describe("public repository operations", () => {
     expect(image.subarray(1, 4).toString("ascii")).toBe("PNG");
     expect(image.readUInt32BE(16)).toBe(1200);
     expect(image.readUInt32BE(20)).toBe(630);
+  });
+
+  test("publishes only the expected assets from public/", () => {
+    const published = readdirSync(resolve(root, "public"), {
+      recursive: true,
+    })
+      .map(String)
+      .sort();
+
+    expect(published).toEqual([
+      ".nojekyll",
+      "favicon.svg",
+      "social-preview.png",
+    ]);
   });
 
   test("documents the GitHub Pages deployment", () => {
@@ -176,9 +190,10 @@ describe("public repository operations", () => {
     expect(schema).not.toMatch(/\bprojects\b/);
     for (const file of [
       "src/pages/index.astro",
-      "src/components/Header.astro",
-      "src/pages/publications.astro",
       "src/pages/404.astro",
+      "src/components/ResearchList.astro",
+      "src/components/PublicationList.astro",
+      "src/components/Footer.astro",
     ]) {
       expect(read(file)).not.toMatch(/Research outputs|>Papers<|>Projects</i);
     }

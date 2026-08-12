@@ -1,7 +1,10 @@
 # Ryan Yu research website
 
-Static Astro research portfolio deployed to GitHub Pages.
+Single-page static Astro research profile deployed to GitHub Pages.
 The canonical public URL is `https://rdyu-cm.github.io/personal-website`.
+
+All public content renders from `/`; the only other route is the branded
+not-found page.
 
 ## Local development
 
@@ -128,7 +131,8 @@ Inspect the production output for:
 - Correct canonical URLs and structured data.
 - Absolute Open Graph and Twitter image URLs.
 - Base-prefixed static asset paths under `/personal-website/`.
+- One `<loc>` in `sitemap-0.xml`, since the site is a single page.
 - No `/cv` page, résumé PDF, phone number, credentials, or private material.
 
-After an approved push to `main`, smoke-test Home, Research, Publications &
-Presentations, About, and the branded not-found page on the live Pages URL.
+After an approved push to `main`, smoke-test the single page and the branded
+not-found page on the live Pages URL.

@@ -1,247 +1,139 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 
 import PublicationList from "../components/PublicationList.astro";
 import ResearchList from "../components/ResearchList.astro";
 import { profile } from "../data/profile";
-import { takeFeatured } from "../lib/content";
-import { buildPersonJsonLd } from "../lib/structured-data";
+import { filterPublicEntries, sortByDateDescending } from "../lib/content";
+import {
+  buildPersonJsonLd,
+  buildScholarlyArticleJsonLd,
+  publicationFragmentId,
+} from "../lib/structured-data";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const featuredResearch = takeFeatured(await getCollection("research"), 3);
-const latestOutputs = takeFeatured(await getCollection("publications"), 3);
-const linkedIn = profile.links.find((link) => link.label === "LinkedIn");
-const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const personJsonLd = buildPersonJsonLd(
-  profile,
-  Astro.site?.toString() ?? profile.domain,
+const research = sortByDateDescending(
+  filterPublicEntries(await getCollection("research")),
 );
+const publications = sortByDateDescending(
+  filterPublicEntries(await getCollection("publications")),
+);
+
+const [about] = await getCollection("about");
+if (!about) throw new Error("Expected src/content/about/about.md");
+const { Content: AboutContent } = await render(about);
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+const personJsonLd = buildPersonJsonLd(profile, canonical.toString());
+const scholarlyJsonLd = publications.flatMap((publication) => {
+  const publicationUrl = new URL(canonical);
+  publicationUrl.hash = publicationFragmentId(publication.id);
+  const jsonLd = buildScholarlyArticleJsonLd(
+    publication,
+    publicationUrl.toString(),
+  );
+  return jsonLd ? [jsonLd] : [];
+});
 ---
 
 <BaseLayout
   title={profile.name}
   description={profile.homepageSummary}
-  jsonLd={personJsonLd}
+  jsonLd={[personJsonLd, ...scholarlyJsonLd]}
 >
-  <section class="home-hero">
-    <div class="container home-hero__grid">
-      <div class="hero-copy">
-        <p class="hero-headline">{profile.headline}</p>
-        <h1>{profile.name}</h1>
+  <div class="container page">
+    <header class="identity">
+      <h1>{profile.name}</h1>
+      <p class="identity__role">
+        {profile.headline}
         {
           profile.affiliation && (
-            <p class="hero-affiliation">{profile.affiliation}</p>
+            <>
+              <span aria-hidden="true"> · </span>
+              {profile.affiliation}
+            </>
           )
         }
-        <p class="hero-summary">{profile.homepageSummary}</p>
-        <div class="hero-actions">
-          <a class="button" href={`${base}/research`}>Research</a>
-          {
-            linkedIn && (
+      </p>
+      <ul class="identity__links" aria-label="Contact and profiles">
+        {
+          profile.links.map((link) => (
+            <li>
               <a
-                class="button button--secondary"
-                href={linkedIn.href}
-                aria-label={`${profile.name} on LinkedIn`}
+                href={link.href}
+                aria-label={
+                  link.label === "Email"
+                    ? `Email ${profile.name}`
+                    : `${profile.name} on ${link.label}`
+                }
               >
-                LinkedIn
+                {link.label}
               </a>
-            )
-          }
-        </div>
-      </div>
-      <div class="hero-orbit" aria-hidden="true"><span></span></div>
-    </div>
-  </section>
+            </li>
+          ))
+        }
+      </ul>
+    </header>
 
-  {
-    featuredResearch.length > 0 && (
-      <section
-        class="home-section research-section"
-        aria-labelledby="research-title"
-      >
-        <div class="container">
-          <h2 id="research-title">Current research</h2>
-          <ResearchList research={featuredResearch} />
-        </div>
-      </section>
-    )
-  }
+    <section class="section" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      <div class="section__body prose"><AboutContent /></div>
+    </section>
 
-  {
-    latestOutputs.length > 0 && (
-      <section class="home-section outputs" aria-labelledby="outputs-title">
-        <div class="container">
-          <h2 id="outputs-title">Latest publications &amp; presentations</h2>
-          <PublicationList publications={latestOutputs} />
-        </div>
-      </section>
-    )
-  }
+    {
+      research.length > 0 && (
+        <section class="section" aria-labelledby="research-title">
+          <h2 id="research-title">Research</h2>
+          <div class="section__body">
+            <ResearchList research={research} />
+          </div>
+        </section>
+      )
+    }
+
+    {
+      publications.length > 0 && (
+        <section class="section" aria-labelledby="publications-title">
+          <h2 id="publications-title">Publications &amp; Presentations</h2>
+          <div class="section__body">
+            <PublicationList publications={publications} />
+          </div>
+        </section>
+      )
+    }
+  </div>
 </BaseLayout>
 
 <style>
-  .home-hero {
-    overflow: hidden;
-    border-block-end: 1px solid var(--border);
-    background:
-      radial-gradient(
-        circle at 84% 52%,
-        color-mix(in oklch, var(--accent) 12%, transparent),
-        transparent 28rem
-      ),
-      var(--surface);
+  .page {
+    padding-block-start: var(--space-xl);
   }
 
-  .home-hero__grid {
-    min-height: clamp(32rem, 70vh, 43rem);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.74fr);
-    align-items: center;
-    gap: var(--space-l) var(--space-xl);
-    padding-block: var(--space-xl);
+  .identity h1 {
+    margin-block-end: var(--space-s);
   }
 
-  .hero-copy {
-    position: relative;
-    z-index: 1;
-    max-width: 46rem;
+  .identity__role {
+    color: var(--ink-muted);
+    font-size: var(--step-1);
+    line-height: 1.4;
   }
 
-  .hero-headline {
-    margin-block-end: var(--space-m);
-    color: var(--primary-strong);
-    font-size: var(--step-0);
-    font-weight: 720;
-  }
-
-  .hero-affiliation {
-    margin-block-start: var(--space-s);
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  .hero-summary {
-    max-width: 39rem;
-    margin-block-start: var(--space-l);
-    color: var(--ink);
-    font-size: var(--step-2);
-    font-weight: 650;
-    letter-spacing: -0.02em;
-    line-height: 1.32;
-  }
-
-  .hero-actions {
+  .identity__links {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s);
-    margin-block-start: var(--space-l);
+    gap: var(--space-2xs) var(--space-m);
+    margin: var(--space-m) 0 0;
+    padding: 0;
+    font-size: var(--step--1);
+    list-style: none;
   }
 
-  .hero-orbit {
-    position: relative;
-    width: min(100%, 29rem);
-    aspect-ratio: 1;
-    justify-self: end;
-    border-radius: 50%;
-    background:
-      radial-gradient(
-        circle at center,
-        transparent 0 27%,
-        color-mix(in oklch, var(--primary) 24%, transparent) 27.5% 28%,
-        transparent 28.5% 44%,
-        color-mix(in oklch, var(--accent) 18%, transparent) 44.5% 45%,
-        transparent 45.5%
-      ),
-      radial-gradient(
-        circle at 28% 30%,
-        color-mix(in oklch, var(--primary) 20%, transparent),
-        transparent 44%
-      ),
-      radial-gradient(
-        circle at 72% 68%,
-        color-mix(in oklch, var(--accent) 15%, transparent),
-        transparent 42%
-      );
-    pointer-events: none;
+  .section {
+    margin-block-start: var(--space-xl);
   }
 
-  .hero-orbit::before,
-  .hero-orbit::after {
-    content: "";
-    position: absolute;
-    inset: 12%;
-    border: 1px solid
-      color-mix(in oklch, var(--primary-strong) 52%, transparent);
-    border-radius: 50%;
-  }
-
-  .hero-orbit::before {
-    transform: rotate(28deg) scaleY(0.42);
-  }
-
-  .hero-orbit::after {
-    transform: rotate(-38deg) scaleY(0.58);
-    border-color: color-mix(in oklch, var(--accent) 48%, transparent);
-  }
-
-  .hero-orbit span {
-    position: absolute;
-    inset: 35%;
-    border-radius: 50%;
-    background:
-      radial-gradient(
-        circle at 34% 30%,
-        color-mix(in oklch, var(--ink) 75%, transparent) 0 4%,
-        transparent 5%
-      ),
-      radial-gradient(
-        circle at 38% 34%,
-        var(--primary-strong),
-        var(--primary) 36%,
-        color-mix(in oklch, var(--surface) 78%, var(--primary)) 72%
-      );
-    box-shadow:
-      0 0 0 1px color-mix(in oklch, var(--primary-strong) 54%, transparent),
-      0 0 3rem color-mix(in oklch, var(--primary) 24%, transparent);
-  }
-
-  .home-section {
-    padding-block: var(--space-xl);
-  }
-
-  .home-section h2 {
-    margin-block-end: var(--space-l);
-  }
-
-  .research-section {
-    background: var(--canvas);
-  }
-
-  .outputs {
-    border-block-start: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  @media (max-width: 48rem) {
-    .home-hero__grid {
-      min-height: 0;
-      grid-template-columns: 1fr;
-      align-items: start;
-    }
-
-    .hero-orbit {
-      width: min(78vw, 21rem);
-      justify-self: center;
-    }
-  }
-
-  @media (max-width: 24rem) {
-    .hero-summary {
-      font-size: var(--step-1);
-    }
-
-    .hero-actions .button {
-      flex: 1;
-    }
+  .section__body {
+    margin-block-start: var(--space-m);
   }
 </style>

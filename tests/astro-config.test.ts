@@ -1,5 +1,7 @@
 import { expect, test, vi } from "vitest";
 
+import { createSitemapFilter } from "../astro.config.mjs";
+
 const githubPagesSite = "https://rdyu-cm.github.io/personal-website";
 const rootDomainSite = "https://research.example.com";
 
@@ -36,4 +38,22 @@ test("uses no base for a root-domain SITE_URL", async () => {
 
   expect(config.site).toBe(rootDomainSite);
   expect(config.base).toBeUndefined();
+});
+
+test("emits each sitemap URL once regardless of trailing slash", () => {
+  const filter = createSitemapFilter();
+
+  expect(
+    [
+      `${githubPagesSite}`,
+      `${githubPagesSite}/`,
+      `${githubPagesSite}/research`,
+    ].filter(filter),
+  ).toEqual([githubPagesSite, `${githubPagesSite}/research`]);
+});
+
+test("keeps a root-domain index rather than dropping it as a duplicate", () => {
+  const filter = createSitemapFilter();
+
+  expect([`${rootDomainSite}/`].filter(filter)).toEqual([`${rootDomainSite}/`]);
 });

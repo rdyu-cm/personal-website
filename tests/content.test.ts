@@ -4,15 +4,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-import {
-  canFilterPublications,
-  filterPublicEntries,
-  filterPublications,
-  normalizePublicationType,
-  publicationFilterOptions,
-  sortByDateDescending,
-  takeFeatured,
-} from "../src/lib/content";
+import { filterPublicEntries, sortByDateDescending } from "../src/lib/content";
 import { availableExternalLinks } from "../src/lib/external-links";
 
 const readSource = (path: string) =>
@@ -58,10 +50,6 @@ describe("content selectors", () => {
     ]);
   });
 
-  test("normalizes publication types to lowercase comparison keys", () => {
-    expect(normalizePublicationType("  Preprint \n")).toBe("preprint");
-  });
-
   test("excludes draft entries", () => {
     expect(filterPublicEntries(entries).map((entry) => entry.id)).toEqual([
       "earlier-featured",
@@ -78,100 +66,6 @@ describe("content selectors", () => {
       "earlier-featured",
     ]);
     expect(entries.map((entry) => entry.id)).toEqual(before);
-  });
-
-  test("returns the newest public featured entries up to the requested limit", () => {
-    const featuredEntries = [
-      entries[0],
-      entries[1],
-      entries[2],
-      {
-        id: "newest-featured",
-        data: { date: new Date("2026-01-01"), draft: false, featured: true },
-      },
-      {
-        id: "middle-featured",
-        data: { date: new Date("2025-03-01"), draft: false, featured: true },
-      },
-    ];
-
-    expect(takeFeatured(featuredEntries, 2).map((entry) => entry.id)).toEqual([
-      "newest-featured",
-      "middle-featured",
-    ]);
-  });
-  test("does not offer a publication filter below the public-entry threshold", () => {
-    const publications = Array.from({ length: 7 }, (_, index) => ({
-      id: `publication-${index}`,
-      data: {
-        date: new Date(`202${index % 2}-01-01T00:00:00.000Z`),
-        draft: false,
-        featured: false,
-        type: index % 2 === 0 ? "Article" : "Preprint",
-      },
-    }));
-
-    expect(canFilterPublications(publications, "type")).toBe(false);
-  });
-
-  test("does not offer a publication filter when its chosen dimension has one meaningful value", () => {
-    const publications = Array.from({ length: 8 }, (_, index) => ({
-      id: `publication-${index}`,
-      data: {
-        date: new Date(`202${index % 3}-01-01T00:00:00.000Z`),
-        draft: false,
-        featured: false,
-        type: "Manuscript",
-      },
-    }));
-
-    expect(canFilterPublications(publications, "type")).toBe(false);
-  });
-
-  test("offers and applies a publication filter for eight public entries with two types", () => {
-    const publications = [
-      { id: "old-article", type: "Article", year: 2023, draft: false },
-      { id: "new-preprint", type: "Preprint", year: 2025, draft: false },
-      { id: "middle-article", type: "Article", year: 2024, draft: false },
-      { id: "draft", type: "Preprint", year: 2026, draft: true },
-      ...Array.from({ length: 5 }, (_, index) => ({
-        id: `other-${index}`,
-        type: index % 2 === 0 ? "Article" : "Preprint",
-        year: 2022,
-        draft: false,
-      })),
-    ].map(({ id, type, year, draft }) => ({
-      id,
-      data: {
-        date: new Date(`${year}-01-01T00:00:00.000Z`),
-        draft,
-        featured: false,
-        type,
-      },
-    }));
-    const publicPublications = filterPublicEntries(publications);
-
-    expect(sortByDateDescending(publications).map(({ id }) => id)).toEqual([
-      "draft",
-      "new-preprint",
-      "middle-article",
-      "old-article",
-      "other-0",
-      "other-1",
-      "other-2",
-      "other-3",
-      "other-4",
-    ]);
-    expect(canFilterPublications(publicPublications, "type")).toBe(true);
-    expect(publicationFilterOptions(publications, "type")).toEqual([
-      { label: "Article", value: "article" },
-      { label: "Preprint", value: "preprint" },
-    ]);
-    expect(
-      filterPublications(publicPublications, "type", " PREPRINT ").map(
-        ({ id }) => id,
-      ),
-    ).toEqual(["new-preprint", "other-1", "other-3"]);
   });
 });
 
