@@ -1,7 +1,6 @@
 import { expect, test, vi } from "vitest";
 
 const githubPagesSite = "https://rdyu-cm.github.io/personal-website";
-const workerSite = "https://site.rdyu-cm.workers.dev";
 const rootDomainSite = "https://research.example.com";
 
 const loadDefaultConfig = async () => {
@@ -16,11 +15,12 @@ const loadConfig = async (siteUrl: string) => {
   return (await import("../astro.config.mjs")).default;
 };
 
-test("defaults production builds to the root Worker URL", async () => {
+test("defaults production builds to the GitHub Pages project URL", async () => {
   const config = await loadDefaultConfig();
 
-  expect(config.site).toBe(workerSite);
-  expect(config.base).toBeUndefined();
+  expect(config.site).toBe(githubPagesSite);
+  expect(config.base).toBe("/personal-website");
+  expect(config.trailingSlash).toBe("never");
 });
 
 test("derives the GitHub Pages repository base from SITE_URL", async () => {

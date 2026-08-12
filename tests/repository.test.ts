@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, test } from "vitest";
@@ -16,16 +16,45 @@ describe("public repository operations", () => {
     expect(image.readUInt32BE(20)).toBe(630);
   });
 
-  test("documents the Cloudflare Workers Static Assets deployment", () => {
+  test("documents the GitHub Pages deployment", () => {
     const readme = read("README.md");
 
-    expect(readme).toContain("Cloudflare Workers Static Assets");
-    expect(readme).toContain("Worker `rdyu-site`");
-    expect(readme).toMatch(/Pushes to `main`\s+automatically build and deploy/);
-    expect(readme).toContain("npx wrangler@latest deploy");
+    expect(readme).toContain("deployed to GitHub Pages");
+    expect(readme).toContain("https://rdyu-cm.github.io/personal-website");
+    expect(readme).toMatch(/Pushes to `main`\s+build and verify the site/);
+    expect(readme).toContain(".github/workflows/ci.yml");
     expect(readme).not.toContain("src/pages/cv.astro");
     expect(readme).not.toContain("HTML CV");
-    expect(readme).not.toContain("GitHub Pages");
+  });
+
+  test("retains no Cloudflare deployment surface", () => {
+    const tracked = execFileSync("git", ["ls-files"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+
+    expect(tracked).not.toMatch(/wrangler/i);
+    for (const file of [
+      "README.md",
+      "astro.config.mjs",
+      ".github/workflows/ci.yml",
+    ]) {
+      expect(read(file)).not.toMatch(/cloudflare|wrangler|workers\.dev/i);
+    }
+  });
+
+  test("publishes the verified build to GitHub Pages from CI", () => {
+    const workflow = read(".github/workflows/ci.yml");
+
+    expect(workflow).toContain(
+      "SITE_URL: https://rdyu-cm.github.io/personal-website",
+    );
+    expect(workflow).toContain("actions/upload-pages-artifact@");
+    expect(workflow).toContain("actions/deploy-pages@");
+    expect(workflow).toMatch(/deploy:\s+needs: verify/);
+    expect(workflow).toMatch(/pages: write/);
+    expect(workflow).toMatch(/id-token: write/);
+    expect(existsSync(resolve(root, "public/.nojekyll"))).toBe(true);
   });
 
   test("documents the four editable research-profile content sources", () => {

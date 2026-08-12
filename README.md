@@ -1,7 +1,7 @@
 # Ryan Yu research website
 
-Static Astro research portfolio deployed as Cloudflare Workers Static Assets.
-The canonical public URL is `https://site.rdyu-cm.workers.dev`.
+Static Astro research portfolio deployed to GitHub Pages.
+The canonical public URL is `https://rdyu-cm.github.io/personal-website`.
 
 ## Local development
 
@@ -68,40 +68,46 @@ referenced asset paths.
 Git and must stay untracked; never move, link, or copy it into `public/` or
 `dist/`. The public site intentionally has no CV route or résumé download.
 
-## Cloudflare deployment
+## GitHub Pages deployment
 
-Worker `rdyu-site` is connected to `rdyu-cm/personal-website`. Pushes to `main`
-automatically build and deploy through Cloudflare Workers Builds.
+`.github/workflows/ci.yml` is the single deployment path. Pushes to `main`
+build and verify the site, then publish `dist/` to GitHub Pages; the `deploy`
+job runs only after `verify` succeeds, so a failing check blocks publication.
+Pull requests and other branches run verification without deploying.
 
-| Setting                       | Value                                                |
-| ----------------------------- | ---------------------------------------------------- |
-| Production branch             | `main`                                               |
-| Build command                 | `npm run build`                                      |
-| Deploy command                | `npx wrangler@latest deploy`                         |
-| Non-production deploy command | `npx wrangler@latest versions upload`                |
-| Root directory                | `/`                                                  |
-| Node.js version               | 22.12 or newer                                       |
-| Environment variable          | `SITE_URL=https://site.rdyu-cm.workers.dev`          |
-| Preview behavior              | Preview builds for feature branches or pull requests |
+| Setting              | Value                                                 |
+| -------------------- | ----------------------------------------------------- |
+| Production branch    | `main`                                                |
+| Pages source         | GitHub Actions                                        |
+| Build command        | `npm run build`                                       |
+| Publish directory    | `dist`                                                |
+| Node.js version      | 22.12 or newer                                        |
+| Environment variable | `SITE_URL=https://rdyu-cm.github.io/personal-website` |
+| Environment          | `github-pages`                                        |
 
-`wrangler.jsonc` serves the generated `dist` directory through Workers Static
-Assets. The project uses static Astro output: it has no Worker entry point,
-Astro server adapter, or runtime compute.
+Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**
+once; the workflow needs no other repository configuration, tokens, or secrets.
+`public/.nojekyll` keeps the underscore-prefixed `_astro/` asset directory
+servable if the site is ever published from a branch instead.
 
-Cloudflare credentials, GitHub access, domains, and DNS remain external to this
-repository. Do not commit credentials or tokens.
+The project uses static Astro output: it has no server adapter, runtime
+compute, or deployment credentials in this repository. Do not commit
+credentials or tokens.
 
 ## Custom-domain handoff
 
-`SITE_URL` controls Astro’s canonical `site` and deployment base. For a future
-root-domain deployment, use the final HTTPS origin without a path:
+`SITE_URL` controls Astro’s canonical `site` and deployment base. The project
+URL includes the `/personal-website` repository path, which Astro derives into
+`base`. For a future root-domain deployment, use the final HTTPS origin without
+a path:
 
 ```bash
 SITE_URL=https://research.example.com npm run build
 ```
 
-Set the identical value in Cloudflare Workers Builds when connecting the custom
-domain. DNS and domain configuration are intentionally outside this repository.
+Set the identical value in `.github/workflows/ci.yml` and add the domain under
+**Settings → Pages → Custom domain**. DNS and domain registration are
+intentionally outside this repository.
 
 ## Release verification
 
@@ -114,7 +120,6 @@ npm run check
 npm run test:unit
 CI=1 npm run test:e2e
 npm run build
-npx wrangler deploy --dry-run
 ```
 
 Inspect the production output for:
@@ -122,8 +127,8 @@ Inspect the production output for:
 - `sitemap-index.xml`, `robots.txt`, and `404.html`.
 - Correct canonical URLs and structured data.
 - Absolute Open Graph and Twitter image URLs.
-- Root-relative static assets.
+- Base-prefixed static asset paths under `/personal-website/`.
 - No `/cv` page, résumé PDF, phone number, credentials, or private material.
 
 After an approved push to `main`, smoke-test Home, Research, Publications &
-Presentations, About, and the branded not-found page on the live Worker URL.
+Presentations, About, and the branded not-found page on the live Pages URL.
