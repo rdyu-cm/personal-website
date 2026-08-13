@@ -5,7 +5,7 @@ institution: "Stanford University"
 date: 2026-06-01
 datePrecision: month
 status: "Ongoing"
-summary: "Sparse autoencoders for interpretable structural and conformational-distribution features in BioEmu and ESM3 protein representations."
+summary: "Sparse autoencoders for interpretable structural and conformational-distribution features in BioEmu and AlphaFold3 protein representations."
 methods:
   - "Sparse autoencoders"
   - "BioEmu"
