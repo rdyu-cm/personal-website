@@ -15,7 +15,6 @@ themes:
 featured: true
 draft: false
 venue: "Proceedings of the National Academy of Sciences"
-summary: "Molecular simulation study of a G-protein-first pathway for ligand activation of the Smoothened G protein-coupled receptor."
 links:
   doi: "https://doi.org/10.1073/pnas.2604658123"
 ---

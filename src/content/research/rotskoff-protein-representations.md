@@ -14,4 +14,4 @@ featured: true
 draft: false
 ---
 
-In the Rotskoff Lab, I train sparse autoencoders on BioEmu and ESM3 representations to extract interpretable features corresponding to structural and conformational-distribution properties in proteins.
+In the Rotskoff Lab, I train sparse autoencoders on BioEmu and AlphaFold3 representations to extract interpretable features corresponding to structural and conformational-distribution properties in proteins. These features are then used to steer generation towards desired properties through direct manipulation of the latent space.

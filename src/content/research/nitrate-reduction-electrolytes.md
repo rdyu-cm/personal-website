@@ -16,4 +16,4 @@ featured: true
 draft: false
 ---
 
-In the Fong Lab, I conduct molecular dynamics and density functional theory calculations in LAMMPS and CP2K to train MACE machine learning interatomic potentials for the metal-electrolyte interfacial environment in electrochemical nitrate reduction. I'm currently working on systems of nitrate, alkali-cations, water, and a copper interface.
+In the Fong Lab, I train MACE machine learning interatomic potentials through in house density functional theory calculations and conduct molecular dynamics to understand more about the metal-electrolyte interfacial environment in electrochemical nitrate reduction. I'm currently working on systems of nitrate, alkali-cations, water, and copper.
