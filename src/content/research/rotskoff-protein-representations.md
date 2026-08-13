@@ -9,7 +9,7 @@ summary: "Sparse autoencoders for interpretable structural and conformational-di
 methods:
   - "Sparse autoencoders"
   - "BioEmu"
-  - "ESM3"
+  - "AlphaFold3"
 featured: true
 draft: false
 ---
