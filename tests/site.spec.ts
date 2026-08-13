@@ -211,8 +211,10 @@ test("research methods render as plain text rather than chips", async ({
 }) => {
   await page.goto("/");
 
+  // Assert the rendering contract — middot-joined prose, not list chips —
+  // rather than the method names themselves, which change with the work.
   const methods = page.locator(".research-entry__methods").first();
-  await expect(methods).toHaveText("Sparse autoencoders · BioEmu · ESM3");
+  await expect(methods).toHaveText(/^[^·]+( · [^·]+)+$/);
   await expect(methods.locator("li")).toHaveCount(0);
 });
 
