@@ -153,12 +153,14 @@ describe("current public research record", () => {
       "src/content/research/smoothened-gi.md",
     ].map(readSource);
 
+    // Pin each record by its lab rather than by model or tool names, which
+    // change as the work does.
     expect(records[0]).toContain("date: 2026-06-01");
-    expect(records[0]).toContain("BioEmu and ESM3");
+    expect(records[0]).toContain('lab: "Rotskoff Lab"');
     expect(records[1]).toContain("date: 2024-12-01");
-    expect(records[1]).toContain("LAMMPS and CP2K");
+    expect(records[1]).toContain('lab: "Fong Lab"');
     expect(records[2]).toContain("date: 2023-12-01");
-    expect(records[2]).toContain("GROMACS and PLUMED");
+    expect(records[2]).toContain('lab: "Goddard Lab"');
   });
 
   test("publishes the PNAS article and DOI", () => {
