@@ -81,22 +81,22 @@ const scholarlyJsonLd = publications.flatMap((publication) => {
     </section>
 
     {
-      research.length > 0 && (
-        <section class="section" aria-labelledby="research-title">
-          <h2 id="research-title">Research</h2>
+      publications.length > 0 && (
+        <section class="section" aria-labelledby="publications-title">
+          <h2 id="publications-title">Publications &amp; Presentations</h2>
           <div class="section__body">
-            <ResearchList research={research} />
+            <PublicationList publications={publications} />
           </div>
         </section>
       )
     }
 
     {
-      publications.length > 0 && (
-        <section class="section" aria-labelledby="publications-title">
-          <h2 id="publications-title">Publications &amp; Presentations</h2>
+      research.length > 0 && (
+        <section class="section" aria-labelledby="research-title">
+          <h2 id="research-title">Research</h2>
           <div class="section__body">
-            <PublicationList publications={publications} />
+            <ResearchList research={research} />
           </div>
         </section>
       )
