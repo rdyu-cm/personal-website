@@ -30,15 +30,34 @@ describe("public repository operations", () => {
     ]);
   });
 
-  test("documents the GitHub Pages deployment", () => {
+  test("keeps the README outward facing", () => {
     const readme = read("README.md");
 
-    expect(readme).toContain("deployed to GitHub Pages");
     expect(readme).toContain("https://rdyu-cm.github.io/personal-website");
-    expect(readme).toMatch(/Pushes to `main`\s+build and verify the site/);
-    expect(readme).toContain(".github/workflows/ci.yml");
-    expect(readme).not.toContain("src/pages/cv.astro");
-    expect(readme).not.toContain("HTML CV");
+    expect(readme).not.toMatch(/npm (ci|run)/);
+    expect(readme).not.toContain(".github/workflows/ci.yml");
+  });
+
+  test("documents the GitHub Pages deployment", () => {
+    const guide = read("docs/MAINTAINING.md");
+
+    expect(guide).toContain("deployed to GitHub Pages");
+    expect(guide).toContain("https://rdyu-cm.github.io/personal-website");
+    expect(guide).toMatch(/Pushes to `main`\s+build and verify the site/);
+    expect(guide).toContain(".github/workflows/ci.yml");
+    expect(guide).not.toContain("src/pages/cv.astro");
+    expect(guide).not.toContain("HTML CV");
+  });
+
+  test("documents the local verification shortcut", () => {
+    const guide = read("docs/MAINTAINING.md");
+    const script = JSON.parse(read("package.json")).scripts.verify;
+
+    expect(guide).toContain("npm run verify");
+    expect(guide).toContain(script);
+    for (const gate of ["format", "check", "test:unit", "test:e2e", "build"]) {
+      expect(script).toContain(`npm run ${gate}`);
+    }
   });
 
   test("retains no Cloudflare deployment surface", () => {
@@ -50,6 +69,7 @@ describe("public repository operations", () => {
     expect(tracked).not.toMatch(/wrangler/i);
     for (const file of [
       "README.md",
+      "docs/MAINTAINING.md",
       "astro.config.mjs",
       ".github/workflows/ci.yml",
     ]) {
@@ -72,7 +92,7 @@ describe("public repository operations", () => {
   });
 
   test("documents the four editable research-profile content sources", () => {
-    const readme = read("README.md");
+    const guide = read("docs/MAINTAINING.md");
 
     for (const source of [
       "src/data/profile.ts",
@@ -80,20 +100,20 @@ describe("public repository operations", () => {
       "src/content/publications/",
       "src/content/about/about.md",
     ]) {
-      expect(readme).toContain(source);
+      expect(guide).toContain(source);
     }
-    expect(readme).not.toContain("src/content/projects/");
-    expect(readme).not.toMatch(/\bone project\b|\bPapers\b/);
+    expect(guide).not.toContain("src/content/projects/");
+    expect(guide).not.toMatch(/\bone project\b|\bPapers\b/);
   });
 
   test("documents every required research and publication frontmatter field", () => {
-    const readme = read("README.md");
+    const guide = read("docs/MAINTAINING.md");
     const researchRequirements =
-      readme.match(
+      guide.match(
         /Research records require([\s\S]*?)\. Publication records/,
       )?.[1] ?? "";
     const publicationRequirements =
-      readme.match(
+      guide.match(
         /Publication records\s+require([\s\S]*?)\. Publication `venue`/,
       )?.[1] ?? "";
 

@@ -14,5 +14,3 @@ methods:
 featured: true
 draft: false
 ---
-
-
